@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Text;
 using eg_unity_shared_tools.Code.Editor.Utilities;
 
 namespace eg_unity_shared_tools.Code.Editor
@@ -12,38 +13,50 @@ namespace eg_unity_shared_tools.Code.Editor
         private int _numLines;
         private Vector2 scrollPosition;
         private int _scrollHeight = 250;
+        private GUIStyle boxStyle;
 
-        [MenuItem("EspidiGames/Tools/AssetBundle Explorer Tool")]
+        [MenuItem(Constants.BaseMenu + Constants.ToolsMenu + "AssetBundle Explorer Tool")]
         public static void ShowWindow()
         {
             var window = GetWindow<AssetBundleExplorerTool>("AssetBundle Tool");
-            window.minSize = new Vector2(300, 300);
+            window.minSize = new Vector2(300, 320);
         }
-
+        
+        private void OnEnable()
+        {
+            boxStyle = CustomEditorStyles.CreateTextFieldStyle();
+        }
+        
         private void OnGUI()
         {
+            EditorGUILayout.Space(10);
+            
             GUILayout.Label("Select an asset bundle file", EditorStyles.boldLabel);
             
             EditorGUILayout.BeginHorizontal();
             
             assetBundleFilePath = EditorGUILayout.TextField(assetBundleFilePath);
-            
             UGUIUtils.DrawButton("...", OpenFileBrowser, GUILayout.Width(25));
             
             EditorGUILayout.EndHorizontal();
             
-            EditorGUILayout.Space();
+            EditorGUILayout.Space(10);
 
-            UGUIUtils.DrawButton("List Bundle contents", ListAssetBundleContents);
+            var shouldDisableLoadButton = string.IsNullOrWhiteSpace(assetBundleFilePath);
+            UGUIUtils.DrawLockableButton("Load Asset Bundle", ListAssetBundleContents, shouldDisableLoadButton);
             
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(_scrollHeight));
+            EditorGUILayout.BeginVertical(boxStyle);
             
-            EditorGUILayout.TextArea(_assetBundleContentList,
-                GUILayout.Height(Mathf.Max(_scrollHeight, EditorGUIUtility.singleLineHeight * _numLines)));
-            
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(200));
+            GUILayout.Label(_assetBundleContentList, GUILayout.ExpandHeight(true));
             EditorGUILayout.EndScrollView();
+            
+            EditorGUILayout.EndVertical();
 
-            UGUIUtils.DrawButton("Export contents to txt", ExportContentListToFile);
+            EditorGUILayout.Space(10);
+
+            var shouldDisableExportButton = string.IsNullOrWhiteSpace(_assetBundleContentList);
+            UGUIUtils.DrawLockableButton("Export contents to txt", ExportContentListToFile, shouldDisableExportButton);
             
             Repaint();
         }
@@ -70,12 +83,12 @@ namespace eg_unity_shared_tools.Code.Editor
                 }
                 else
                 {
-                    _assetBundleContentList = "Error al cargar el Asset Bundle.";
+                    _assetBundleContentList = "Error loading the Asset Bundle.";
                 }
             }
             else
             {
-                _assetBundleContentList = "Ruta de archivo no válida o no seleccionada.";
+                _assetBundleContentList = "Invalid or empty filepath";
             }
         }
         
@@ -83,15 +96,30 @@ namespace eg_unity_shared_tools.Code.Editor
         {
             if (!string.IsNullOrEmpty(_assetBundleContentList))
             {
-                string exportFilePath = EditorUtility.SaveFilePanel("Exportar lista de contenidos", "",
+                string exportFilePath = EditorUtility.SaveFilePanel("Export bundle contents", "",
                     "AssetBundleContentList", "txt");
 
                 if (!string.IsNullOrEmpty(exportFilePath))
                 {
-                    File.WriteAllText(exportFilePath, _assetBundleContentList);
-                    Debug.Log("Lista de contenidos exportada correctamente a: " + exportFilePath);
+                    var output = BuildOutput();
+                    File.WriteAllText(exportFilePath, output);
                 }
             }
+        }
+
+        private string BuildOutput()
+        {
+            var bundleName = Path.GetFileNameWithoutExtension(assetBundleFilePath);
+            var stringBuilder = new StringBuilder();
+                    
+            stringBuilder.AppendLine($"List of contents of bundle: {bundleName}");
+            stringBuilder.AppendLine($"Bundle path: {assetBundleFilePath}");
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("====================================================================================");
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine(_assetBundleContentList);
+
+            return stringBuilder.ToString();
         }
     }
 
