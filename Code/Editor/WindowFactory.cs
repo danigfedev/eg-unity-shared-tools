@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,6 +15,18 @@ namespace eg_unity_shared_tools.Code.Editor
         public static TToolWindow CreateModalWindow<TToolWindow>(string windowTitle, Vector2 minSize = default) where TToolWindow : EditorWindow
         {
             return CreateWindow<TToolWindow>(windowTitle, true, minSize);
+        }
+
+        public static TToolWindow CreateWindowWithTabs<TToolWindow>(string windowTitle, Type tabsEnum, Vector2 minSize = default) where TToolWindow : EditorWindow
+        {
+            var window = CreateWindow<TToolWindow>(windowTitle, false, minSize);
+            
+            if (window is WindowWithTabs windowWithTabs)
+            {
+                windowWithTabs.SetWindowTabs(typeof(GameIconToolTabs));
+            }
+
+            return window;
         }
 
         private static TToolWindow CreateWindow<TToolWindow>(string windowTitle, 

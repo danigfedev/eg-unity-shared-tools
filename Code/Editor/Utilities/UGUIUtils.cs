@@ -6,7 +6,6 @@ namespace eg_unity_shared_tools.Code.Editor.Utilities
 {
     public static class UGUIUtils
     {
-        // DrawButton<T>(string label, T callback) => Explore this for methods with parameters
         public static void DrawButton(string label, Action callback, params GUILayoutOption[] options)
         {
             if (GUILayout.Button(label, options))
@@ -22,7 +21,7 @@ namespace eg_unity_shared_tools.Code.Editor.Utilities
             EditorGUI.EndDisabledGroup();
         }
 
-        private static string[] tabStyles = 
+        private static readonly string[] TabStyles = 
         {
             "ButtonLeft",
             "ButtonMid",
@@ -35,7 +34,7 @@ namespace eg_unity_shared_tools.Code.Editor.Utilities
 
             for(int tabIndex =0; tabIndex < tabNames.Length; tabIndex++)
             {
-                var style = tabIndex == 0 ? tabStyles[0] : tabIndex == tabNames.Length - 1 ? tabStyles[2] : tabStyles[1];
+                var style = tabIndex == 0 ? TabStyles[0] : tabIndex == tabNames.Length - 1 ? TabStyles[2] : TabStyles[1];
                 
                 if (GUILayout.Toggle(selectedTabIndex == tabIndex, tabNames[tabIndex], style))
                 {
