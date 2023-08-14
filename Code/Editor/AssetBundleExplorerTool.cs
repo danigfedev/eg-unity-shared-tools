@@ -8,6 +8,8 @@ namespace eg_unity_shared_tools.Code.Editor
 {
     public class AssetBundleExplorerTool : EditorWindow
     {
+        private static Vector2 minSize = new Vector2(300, 320);
+        
         private string assetBundleFilePath = "";
         private string _assetBundleContentList = "";
         private int _numLines;
@@ -18,8 +20,7 @@ namespace eg_unity_shared_tools.Code.Editor
         [MenuItem(Constants.BaseMenu + Constants.ToolsMenu + "AssetBundle Explorer Tool")]
         public static void ShowWindow()
         {
-            var window = GetWindow<AssetBundleExplorerTool>("AssetBundle Tool");
-            window.minSize = new Vector2(300, 320);
+            WindowFactory.CreateWindow<AssetBundleExplorerTool>("AssetBundle Explorer", minSize);
         }
         
         private void OnEnable()
