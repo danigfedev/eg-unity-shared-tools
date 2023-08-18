@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -28,13 +29,21 @@ namespace eg_unity_shared_tools.Code.Editor.Utilities
             "ButtonRight"
         };
         
-        public static int DrawTabs(int selectedTabIndex, params string[] tabNames)
+        public static int DrawTabs(int selectedTabIndex, int[] disabledTabsIndexes = null, params string[] tabNames)
         {
             GUILayout.BeginHorizontal();
 
-            for(int tabIndex =0; tabIndex < tabNames.Length; tabIndex++)
+            for(int tabIndex = 0; tabIndex < tabNames.Length; tabIndex++)
             {
                 var style = tabIndex == 0 ? TabStyles[0] : tabIndex == tabNames.Length - 1 ? TabStyles[2] : TabStyles[1];
+                
+                if (disabledTabsIndexes != null && disabledTabsIndexes.Length > 0 && disabledTabsIndexes.Contains(tabIndex))
+                {
+                    EditorGUI.BeginDisabledGroup (true);
+                    GUILayout.Toggle(selectedTabIndex == tabIndex, tabNames[tabIndex], style);
+                    EditorGUI.EndDisabledGroup();
+                    continue;
+                }
                 
                 if (GUILayout.Toggle(selectedTabIndex == tabIndex, tabNames[tabIndex], style))
                 {

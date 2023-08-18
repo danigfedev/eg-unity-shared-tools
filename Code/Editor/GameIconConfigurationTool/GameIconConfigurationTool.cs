@@ -64,15 +64,25 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
                 return;
             }
 
-            string iconsPath = string.IsNullOrWhiteSpace(settings.CustomIconDirectory)
+            var iconsRelativePath = string.IsNullOrWhiteSpace(settings.CustomIconDirectory)
                 ? settings.DefaultIconDirectory
                 : settings.CustomIconDirectory;
+
+            var iconsPath = Path.Combine(Application.dataPath, iconsRelativePath);
 
             bool shouldOpenImportTab = !Directory.Exists(iconsPath) || Directory.GetDirectories(iconsPath).Length == 0;
 
             _selectedTabIndex = shouldOpenImportTab
                 ? (int)GameIconToolTabs.IMPORT_ICON
                 : (int)GameIconToolTabs.SET_ICON;
+
+            if (shouldOpenImportTab)
+            {
+                _disabledTabs = new int[]
+                {
+                    (int)GameIconToolTabs.SET_ICON
+                };
+            }
         }
         
         private static IconToolSettings LoadToolSettings()

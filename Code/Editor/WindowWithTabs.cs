@@ -9,11 +9,12 @@ namespace eg_unity_shared_tools.Code.Editor
     public class WindowWithTabs : EditorWindow
     {
         protected static int _selectedTabIndex = 0;
+        protected static int[] _disabledTabs = null;
         private static string[] _tabNames;
         
         protected virtual void OnGUI()
         {
-            _selectedTabIndex = UGUIUtils.DrawTabs(_selectedTabIndex, _tabNames);
+            _selectedTabIndex = UGUIUtils.DrawTabs(_selectedTabIndex, _disabledTabs, _tabNames);
         }
 
         public void SetWindowTabs(Type tabs)
