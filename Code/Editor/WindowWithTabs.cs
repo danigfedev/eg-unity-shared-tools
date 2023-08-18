@@ -14,7 +14,7 @@ namespace eg_unity_shared_tools.Code.Editor
         
         protected virtual void OnGUI()
         {
-            _selectedTabIndex = UGUIUtils.DrawTabs(_selectedTabIndex, _disabledTabs, _tabNames);
+            _selectedTabIndex = UGUIUtils.DrawTabs(_selectedTabIndex, _tabNames, _disabledTabs);
         }
 
         public void SetWindowTabs(Type tabs)

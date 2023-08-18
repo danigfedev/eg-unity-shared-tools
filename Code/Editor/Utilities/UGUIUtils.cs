@@ -29,7 +29,7 @@ namespace eg_unity_shared_tools.Code.Editor.Utilities
             "ButtonRight"
         };
         
-        public static int DrawTabs(int selectedTabIndex, int[] disabledTabsIndexes = null, params string[] tabNames)
+        public static int DrawTabs(int selectedTabIndex, string[] tabNames, int[] disabledTabsIndexes = null)
         {
             GUILayout.BeginHorizontal();
 
@@ -37,7 +37,7 @@ namespace eg_unity_shared_tools.Code.Editor.Utilities
             {
                 var style = tabIndex == 0 ? TabStyles[0] : tabIndex == tabNames.Length - 1 ? TabStyles[2] : TabStyles[1];
                 
-                if (disabledTabsIndexes != null && disabledTabsIndexes.Length > 0 && disabledTabsIndexes.Contains(tabIndex))
+                if (disabledTabsIndexes != null && disabledTabsIndexes.Contains(tabIndex))
                 {
                     EditorGUI.BeginDisabledGroup (true);
                     GUILayout.Toggle(selectedTabIndex == tabIndex, tabNames[tabIndex], style);
