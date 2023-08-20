@@ -1,5 +1,5 @@
 using System.IO;
-using System.Runtime.InteropServices.WindowsRuntime;
+using eg_unity_shared_tools.Code.Editor.Utilities;
 using UnityEditor;
 using UnityEngine;
 using SharedConstants = eg_unity_shared_tools.Code.Constants;
@@ -16,6 +16,10 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
     public class GameIconConfigurationTool : WindowWithTabs
     {
         private static GameIconConfigurationTool _window;
+        private static string _iconsRelativePath;
+        private static string _iconsAbsolutePath;
+
+        private IIconsToolTabPanel _settingsPanel;
         
         [MenuItem(SharedConstants.BaseMenu + SharedConstants.ToolsMenu + nameof(GameIconConfigurationTool))]
         public static void ShowWindow()
@@ -41,9 +45,11 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
                     DrawImportIconTab();
                     break;
                 case (int)GameIconToolTabs.SETTINGS:
-                    DrawSettingsTab();
+                    _settingsPanel.DrawPanel();
                     break;
             }
+            
+            ToggleSetIconTabAccessibility();
         }
 
         private void InitializeWindow()
@@ -59,50 +65,72 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
 
             if (string.IsNullOrWhiteSpace(settings.DefaultIconDirectory))
             {
-                Debug.LogError($"Null or empty DefaultIconDirectory. This is not supporting. Closing window");
+                Debug.LogError($"Null or empty DefaultIconDirectory. This is not supported. Closing window");
                 _window.Close();
                 return;
             }
 
-            var iconsRelativePath = string.IsNullOrWhiteSpace(settings.CustomIconDirectory)
+            _iconsRelativePath = string.IsNullOrWhiteSpace(settings.CustomIconDirectory)
                 ? settings.DefaultIconDirectory
                 : settings.CustomIconDirectory;
 
-            var iconsPath = Path.Combine(Application.dataPath, iconsRelativePath);
+            _iconsAbsolutePath = FileUtils.BuildAbsolutePathInProject(_iconsRelativePath);
 
-            bool shouldOpenImportTab = !Directory.Exists(iconsPath) || Directory.GetDirectories(iconsPath).Length == 0;
+            ToggleSetIconTabAccessibility();
 
-            _selectedTabIndex = shouldOpenImportTab
-                ? (int)GameIconToolTabs.IMPORT_ICON
-                : (int)GameIconToolTabs.SET_ICON;
+            InitializeTabPanels(settings);
+        }
+        
+        private static IconToolSettings LoadToolSettings()
+        {
+            var settingsPath = Path.Combine(Application.dataPath,
+                Constants.SettingRelativesPath, 
+                Constants.SettingsFileName);
 
-            if (shouldOpenImportTab)
+            var settings = JsonFileManager.LoadJson<IconToolSettings>(settingsPath);
+            
+            return settings;
+        }
+
+        private void InitializeTabPanels(IconToolSettings settings)
+        {
+            _settingsPanel = new SettingsPanel(settings, _iconsRelativePath, OnToolSettingsApplied);
+        }
+
+        private static bool ToggleSetIconTabAccessibility()
+        {
+            var blockSetIconTabAccess = !FileUtils.DirectoryExists(_iconsAbsolutePath) ||
+                                        FileUtils.DirectoryIsEmpty(_iconsAbsolutePath);
+            
+            if (blockSetIconTabAccess)
             {
+                if (_disabledTabs == null)
+                {
+                    _selectedTabIndex = (int)GameIconToolTabs.IMPORT_ICON;
+                }
+                
                 _disabledTabs = new int[]
                 {
                     (int)GameIconToolTabs.SET_ICON
                 };
             }
-        }
-        
-        private static IconToolSettings LoadToolSettings()
-        {
-            string filePath = Path.Combine(Application.dataPath,
-                Constants.SettingRelativesPath, 
-                Constants.SettingsFileName);
-            
-            if (!File.Exists(filePath))
+            else
             {
-                return null;
+                _disabledTabs = null;
             }
 
-            //TODO write an utility that receives a filepath, reads it an parses the object.
-            string jsonString = File.ReadAllText(filePath);
-            var settings = JsonUtility.FromJson<IconToolSettings>(jsonString);
-
-            return settings;
+            return blockSetIconTabAccess;
         }
         
+        //IDEA: ITabContent interface defining DrawTabContent
+        // Then implement class IconToolSettingsTab : ITabContent
+        // Study if it's better that or using an abstract class
+        //Then create the three objects on initialization, or ask a factory to create them
+        //Here, instead of implementing this draw methods, just call the DrawTabContent method from the interface
+        
+        //DOUBT: How to handle Initialization? That can be abstracted, since it's specific of each tab
+        // I can skip the Factory and creat the tabs here, by type. Then I can initialize them.
+
         private void DrawSetIconTab()
         {
             GUILayout.Label("Set Icon Tab");
@@ -113,9 +141,12 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
             GUILayout.Label("Import Icon Tab");
         }
         
-        private void DrawSettingsTab()
+        private void OnToolSettingsApplied(string newIconsRelativePath)
         {
-            GUILayout.Label("Settings Tab");
+            _iconsRelativePath = newIconsRelativePath;
+            _iconsAbsolutePath = FileUtils.BuildAbsolutePathInProject(_iconsRelativePath);
+            
+            //TODO send relative path to Set_Icon and Import tabs
         }
     }
 }
