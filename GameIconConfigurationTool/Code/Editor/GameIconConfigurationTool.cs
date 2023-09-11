@@ -1,5 +1,4 @@
 using System;
-using eg_unity_shared_tools.Utilities;
 using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -43,15 +42,10 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 case (int)GameIconToolTabs.SET_ICON:
                     _iconSelectionPanel.DrawPanel();
                     break;
-                case (int)GameIconToolTabs.IMPORT_ICON:
-                    DrawImportIconTab();
-                    break;
                 case (int)GameIconToolTabs.SETTINGS:
                     _settingsPanel.DrawPanel();
                     break;
             }
-            
-            ToggleSetIconTabAccessibility();
         }
 
         private void InitializeWindow()
@@ -72,9 +66,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 _window.Close();
                 return;
             }
-
-            ToggleSetIconTabAccessibility();
-
+            
             InitializeTabPanels();
         }
 
@@ -82,37 +74,6 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
         {
             _settingsPanel = new SettingsPanel(_settingsModel);
             _iconSelectionPanel = new IconSelectionPanel(_settingsModel);
-        }
-
-        //TODO Remove this, won´t be needed
-        private static bool ToggleSetIconTabAccessibility()
-        {
-            var blockSetIconTabAccess = !FileUtils.DirectoryExists(_settingsModel.IconsAbsolutePath);
-
-            if (!blockSetIconTabAccess)
-            {
-                (var hasSubdirectories, _) = FileUtils.DirectoryHasSubDirectories(_settingsModel.IconsAbsolutePath);
-                blockSetIconTabAccess = !hasSubdirectories;
-            }
-            
-            if (blockSetIconTabAccess)
-            {
-                if (_disabledTabs == null)
-                {
-                    _selectedTabIndex = (int)GameIconToolTabs.IMPORT_ICON;
-                }
-                
-                _disabledTabs = new int[]
-                {
-                    (int)GameIconToolTabs.SET_ICON
-                };
-            }
-            else
-            {
-                _disabledTabs = null;
-            }
-
-            return blockSetIconTabAccess;
         }
         
         //IDEA: ITabContent interface defining DrawTabContent
