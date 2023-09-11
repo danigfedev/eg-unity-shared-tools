@@ -2,7 +2,7 @@
 {
     public enum GameIconToolTabs
     {
-        SET_ICON = 0,
+        ICON_SELECTION = 0,
         SETTINGS
     }
 }

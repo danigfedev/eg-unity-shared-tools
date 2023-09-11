@@ -1,5 +1,7 @@
 ﻿using System.IO;
+using System.Linq;
 using eg_unity_shared_tools.Utilities;
+using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,8 +9,14 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 {
     public class IconSelectionPanel : IIconsToolTabPanel
     {
+        private const string ImportFirstIconButtonLabel = "Import an icon";
+        private const string ImportNewIconButtonLabel = "Import new icon";
+        private const string DirectoryBrowserLabel = "Select a folder";
+        
         private IconToolSettingsModel _settingsModel;
         private int _selectedOptionIndex;
+        private string[] _iconSubdirectoryPaths;
+        private string[] _iconSubdirectoryNames;
         
         public IconSelectionPanel(IconToolSettingsModel settingsModel)
         {
@@ -21,28 +29,22 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             
             //TODO: use a dirty flag that only changes when icons are loaded/added/removed
             
-            (var existingIcons, var subdirectories) = CheckExistingIcons();
-            
-            if (!existingIcons)
+            if (!CheckExistingIcons())
             {
-                // show Import button
-                
-                //Import process:
-                // You import the whole folder, with its name
-                // if that folder exists abort and tell user to rename it
-                // check folder validity (count number of images in folder, and maybe check names?)
+                UGUIUtils.DrawButton(ImportFirstIconButtonLabel, ImportIcon);
             }
             else
             {
-                var iconNames = GetDirectoryNames(subdirectories);
-                _selectedOptionIndex = EditorGUILayout.Popup(_selectedOptionIndex, iconNames);
+                SetIconNames(); //TODO maybe move this into CheckExistingIcons. This will be involved in teh DirtyFlag, for sure
+                _selectedOptionIndex = EditorGUILayout.Popup(_selectedOptionIndex, _iconSubdirectoryNames);
+                
                 //Show import new button in horizontal layout
                 //Show selected icon preview
                 //Show apply button
             }
         }
 
-        private (bool, string[]) CheckExistingIcons()
+        private bool CheckExistingIcons()
         {
             bool existingIcons;
             string[] subdirectories = null;
@@ -58,22 +60,58 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 existingIcons = false;
             }
 
-            return (existingIcons, subdirectories);
+            _iconSubdirectoryPaths = subdirectories;
+
+            return existingIcons;
         }
 
-        private string[] GetDirectoryNames(string[] directoryPaths)
+        private void SetIconNames()
         {
-            var iconsCount = directoryPaths.Length;
-            var directoryNames = new string[iconsCount];
+            var iconsCount = _iconSubdirectoryPaths.Length;
+            var iconNames = new string[iconsCount];
 
             for (int directoryIndex = 0; directoryIndex < iconsCount; directoryIndex++)
             {
-                var splitPath = directoryPaths[directoryIndex].Split(Path.DirectorySeparatorChar);
+                var splitPath = _iconSubdirectoryPaths[directoryIndex].Split(Path.DirectorySeparatorChar);
                 var directoryName = splitPath[splitPath.Length - 1];
-                directoryNames[directoryIndex] = directoryName;
+                iconNames[directoryIndex] = directoryName;
             }
 
-            return directoryNames;
+            _iconSubdirectoryNames = iconNames;
+        }
+        
+        private void ImportIcon()
+        {
+            var selectedDirectory = EditorUtility.OpenFolderPanel(DirectoryBrowserLabel, "", "");
+            
+            var selectedDirectoryInfo = new DirectoryInfo(selectedDirectory);
+            
+            if (_iconSubdirectoryNames != null && _iconSubdirectoryNames.Contains(selectedDirectoryInfo.Name))
+            {
+                Debug.LogWarning($"Error importing {selectedDirectory}. There´s already an icon folder with the same name.");
+                return;
+            }
+
+            if (!CheckSelectedDirectoryValidity())
+            {
+                Debug.LogWarning($"Error importing {selectedDirectory}. The contents of the directory are not valid.");
+                return;
+            }
+            
+            FileUtils.CopyDirectory(selectedDirectory, _settingsModel.IconsAbsolutePath);
+
+            AssetDatabase.Refresh();
+        }
+
+        private bool CheckSelectedDirectoryValidity()
+        {
+            //TODO: define validity rules (count number of images in folder, and maybe check names?)
+            
+            //Directory will have three images (presumably png files):
+            // - icon.png (1024 x 1024)
+            // - background.png (1024 x 1024)
+            // - foreground.png (1024 x 1024)
+            return true;
         }
     }
 }

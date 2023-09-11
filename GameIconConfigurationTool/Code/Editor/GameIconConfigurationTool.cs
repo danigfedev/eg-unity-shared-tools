@@ -39,7 +39,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             
             switch (_selectedTabIndex)
             {
-                case (int)GameIconToolTabs.SET_ICON:
+                case (int)GameIconToolTabs.ICON_SELECTION:
                     _iconSelectionPanel.DrawPanel();
                     break;
                 case (int)GameIconToolTabs.SETTINGS:
@@ -72,6 +72,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
         private void InitializeTabPanels()
         {
+            _selectedTabIndex = (int)GameIconToolTabs.ICON_SELECTION;
             _settingsPanel = new SettingsPanel(_settingsModel);
             _iconSelectionPanel = new IconSelectionPanel(_settingsModel);
         }
