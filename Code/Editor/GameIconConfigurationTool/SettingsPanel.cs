@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using eg_unity_shared_tools.Code.Editor.Utilities;
 using UnityEditor;
@@ -8,39 +7,28 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
 {
     public class SettingsPanel : IIconsToolTabPanel
     {
-        private IconToolSettings _settings;
-        private Action<string> _applySettingsCallback;
-        
-        private string _settingsFilePath;
-        private string _iconsFolderRelativePath;
+        private IconToolSettingsModel _settingsModel;
         private string _unnapliedFolderRelativePath = "";
 
-        public SettingsPanel(IconToolSettings settings, string iconsRelativePath, Action<string> applySettingsCallback)
+        public SettingsPanel(IconToolSettingsModel settingsModel)
         {
-            _settings = settings;
-            _iconsFolderRelativePath = iconsRelativePath;
-            _applySettingsCallback = applySettingsCallback;
-            _unnapliedFolderRelativePath = _iconsFolderRelativePath;
-            
-            _settingsFilePath = Path.Combine(Application.dataPath,
-                Constants.SettingRelativesPath, 
-                Constants.SettingsFileName);
+            _settingsModel = settingsModel;
+            _unnapliedFolderRelativePath = _settingsModel.IconsRelativePath;
         }
             
         public void DrawPanel()
         {
-            // GUILayout.Label("Settings Tab");
             var hasChanges = false;
             
             _unnapliedFolderRelativePath = EditorGUILayout.TextField("Icons path", _unnapliedFolderRelativePath);
             
-            hasChanges = _unnapliedFolderRelativePath != _iconsFolderRelativePath;
+            hasChanges = _unnapliedFolderRelativePath != _settingsModel.IconsRelativePath;
 
             GUI.enabled = hasChanges;
             UGUIUtils.DrawButton("Apply Changes", ApplySettings);
             GUI.enabled = true;
             
-            //TODO dra a reset to default button? Where?
+            //TODO add a reset to default button? Where?
         }
 
         public void UpdateIconsRelativePath()
@@ -50,20 +38,34 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
 
         private void ApplySettings()
         {
-            var oldIconsRelativePath = _iconsFolderRelativePath;
+            var oldIconsRelativePath = _settingsModel.IconsRelativePath;
             
-            _iconsFolderRelativePath = _unnapliedFolderRelativePath;
-            _settings.CustomIconDirectory = _iconsFolderRelativePath;
+            _settingsModel.SetNewIconsRelativePath(_unnapliedFolderRelativePath);
 
             var oldIconsPath = FileUtils.BuildAbsolutePathInProject(oldIconsRelativePath);
-            var newIconsPath = FileUtils.BuildAbsolutePathInProject(_iconsFolderRelativePath);
 
-            //TODO Add more file utils
-            if (!FileUtils.DirectoryExists(newIconsPath))
-            {
-                Directory.CreateDirectory(newIconsPath);
-            }
+            var filesTransfered = TryTransferFiles(oldIconsPath);
             
+            _settingsModel.SaveSettings();
+            
+            if (filesTransfered)
+            {
+                Directory.Delete(oldIconsPath);   
+            }
+        }
+
+        private bool TryTransferFiles(string oldIconsPath)
+        {
+            if (!FileUtils.DirectoryExists(oldIconsPath))
+            {
+                return false; 
+            }
+
+            if (!FileUtils.DirectoryExists(_settingsModel.IconsAbsolutePath))
+            {
+                Directory.CreateDirectory(_settingsModel.IconsAbsolutePath);
+            }
+                
             string[] directories = null;
             if (!FileUtils.DirectoryIsEmpty(oldIconsPath, ref directories))
             {
@@ -72,18 +74,13 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
                 {
                     directoryInfo = new DirectoryInfo(oldIconDirectory);
                     var iconsFolderName = directoryInfo.Name;
-                    var destinationPath = Path.Combine(newIconsPath, iconsFolderName);
-                    
+                    var destinationPath = Path.Combine(_settingsModel.IconsAbsolutePath, iconsFolderName);
+
                     Directory.Move(oldIconDirectory, destinationPath);
                 }
             }
 
-            JsonFileManager.SaveJson(_settings, _settingsFilePath);
-
-            //Delete old path if saved successfully
-            Directory.Delete(oldIconsPath);
-
-            _applySettingsCallback?.Invoke(_iconsFolderRelativePath);
+            return true;
         }
     }
 }

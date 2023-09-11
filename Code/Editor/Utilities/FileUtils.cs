@@ -10,6 +10,7 @@ namespace eg_unity_shared_tools.Code.Editor.Utilities
             return Path.Combine(Application.dataPath, relativePath);
         }
 
+        public static bool FileExists(string filePath) => File.Exists(filePath);
         public static bool DirectoryExists(string directoryPath) => Directory.Exists(directoryPath);
 
         public static bool DirectoryIsEmpty(string directoryPath) =>

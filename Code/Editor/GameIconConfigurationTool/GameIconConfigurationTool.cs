@@ -1,4 +1,4 @@
-using System.IO;
+using System;
 using eg_unity_shared_tools.Code.Editor.Utilities;
 using UnityEditor;
 using UnityEngine;
@@ -6,21 +6,13 @@ using SharedConstants = eg_unity_shared_tools.Code.Constants;
 
 namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
 {
-    public enum GameIconToolTabs
-    {
-        SET_ICON = 0,
-        IMPORT_ICON,
-        SETTINGS
-    }
-    
     public class GameIconConfigurationTool : WindowWithTabs
     {
         private static GameIconConfigurationTool _window;
-        private static string _iconsRelativePath;
-        private static string _iconsAbsolutePath;
 
+        private static IconToolSettingsModel _settingsModel;
         private IIconsToolTabPanel _settingsPanel;
-        
+
         [MenuItem(SharedConstants.BaseMenu + SharedConstants.ToolsMenu + nameof(GameIconConfigurationTool))]
         public static void ShowWindow()
         {
@@ -29,7 +21,15 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
 
         private void OnEnable()
         {
+            _settingsModel = new IconToolSettingsModel();
+            _settingsModel.OnSettingsApplied += OnToolSettingsApplied;
+            
             InitializeWindow();
+        }
+
+        private void OnDisable()
+        {
+            _settingsModel.OnSettingsApplied -= OnToolSettingsApplied;
         }
 
         protected override void OnGUI()
@@ -54,53 +54,37 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
 
         private void InitializeWindow()
         {
-            var settings = LoadToolSettings();
-
-            if (settings == null)
+            try
             {
-                Debug.LogError($"NULL Tool settings. Unable to initialize {nameof(GameIconConfigurationTool)} tool. Closing window");
+                _settingsModel.LoadSettings();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"Loading settings failed with message: {exception.Message}");
+                _window.Close();
+            }
+
+            if (string.IsNullOrWhiteSpace(_settingsModel.IconsRelativePath))
+            {
+                Debug.LogError($"Null or empty icons directory. This is not supported. Closing window");
                 _window.Close();
                 return;
             }
-
-            if (string.IsNullOrWhiteSpace(settings.DefaultIconDirectory))
-            {
-                Debug.LogError($"Null or empty DefaultIconDirectory. This is not supported. Closing window");
-                _window.Close();
-                return;
-            }
-
-            _iconsRelativePath = string.IsNullOrWhiteSpace(settings.CustomIconDirectory)
-                ? settings.DefaultIconDirectory
-                : settings.CustomIconDirectory;
-
-            _iconsAbsolutePath = FileUtils.BuildAbsolutePathInProject(_iconsRelativePath);
 
             ToggleSetIconTabAccessibility();
 
-            InitializeTabPanels(settings);
-        }
-        
-        private static IconToolSettings LoadToolSettings()
-        {
-            var settingsPath = Path.Combine(Application.dataPath,
-                Constants.SettingRelativesPath, 
-                Constants.SettingsFileName);
-
-            var settings = JsonFileManager.LoadJson<IconToolSettings>(settingsPath);
-            
-            return settings;
+            InitializeTabPanels();
         }
 
-        private void InitializeTabPanels(IconToolSettings settings)
+        private void InitializeTabPanels()
         {
-            _settingsPanel = new SettingsPanel(settings, _iconsRelativePath, OnToolSettingsApplied);
+            _settingsPanel = new SettingsPanel(_settingsModel);
         }
 
         private static bool ToggleSetIconTabAccessibility()
         {
-            var blockSetIconTabAccess = !FileUtils.DirectoryExists(_iconsAbsolutePath) ||
-                                        FileUtils.DirectoryIsEmpty(_iconsAbsolutePath);
+            var blockSetIconTabAccess = !FileUtils.DirectoryExists(_settingsModel.IconsAbsolutePath) ||
+                                        FileUtils.DirectoryIsEmpty(_settingsModel.IconsAbsolutePath);
             
             if (blockSetIconTabAccess)
             {
@@ -141,12 +125,9 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
             GUILayout.Label("Import Icon Tab");
         }
         
-        private void OnToolSettingsApplied(string newIconsRelativePath)
+        private void OnToolSettingsApplied()
         {
-            _iconsRelativePath = newIconsRelativePath;
-            _iconsAbsolutePath = FileUtils.BuildAbsolutePathInProject(_iconsRelativePath);
             
-            //TODO send relative path to Set_Icon and Import tabs
         }
     }
 }

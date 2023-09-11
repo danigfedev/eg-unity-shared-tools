@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using eg_unity_shared_tools.Code.Editor.Utilities;
 using UnityEditor;
 
-namespace eg_unity_shared_tools.Code.Editor
+namespace eg_unity_shared_tools.Code.Editor.Utilities
 {
     public class WindowWithTabs : EditorWindow
     {

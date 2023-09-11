@@ -3,7 +3,7 @@ using eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool;
 using UnityEditor;
 using UnityEngine;
 
-namespace eg_unity_shared_tools.Code.Editor
+namespace eg_unity_shared_tools.Code.Editor.Utilities
 {
     public static class WindowFactory
     {
