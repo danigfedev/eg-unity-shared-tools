@@ -1,9 +1,9 @@
 using System;
-using eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool;
+using eg_unity_shared_tools.GameIconConfigurationTool.Code;
 using UnityEditor;
 using UnityEngine;
 
-namespace eg_unity_shared_tools.Code.Editor.Utilities
+namespace eg_unity_shared_tools.Utilities.Editor
 {
     public static class WindowFactory
     {

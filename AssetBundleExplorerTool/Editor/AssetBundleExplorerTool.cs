@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEditor;
 using System.IO;
 using System.Text;
-using eg_unity_shared_tools.Code.Editor.Utilities;
+using eg_unity_shared_tools.Utilities;
+using eg_unity_shared_tools.Utilities.Editor;
+using UnityEditor;
+using UnityEngine;
 
-namespace eg_unity_shared_tools.Code.Editor
+namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
 {
     public class AssetBundleExplorerTool : EditorWindow
     {

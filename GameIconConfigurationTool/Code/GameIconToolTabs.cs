@@ -1,4 +1,4 @@
-﻿namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
+﻿namespace eg_unity_shared_tools.GameIconConfigurationTool.Code
 {
     public enum GameIconToolTabs
     {

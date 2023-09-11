@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool.DataContracts;
-using eg_unity_shared_tools.Code.Editor.Utilities;
+using eg_unity_shared_tools.GameIconConfigurationTool.Code.DataContracts;
+using eg_unity_shared_tools.Utilities;
 using UnityEditor;
 using UnityEngine;
 
-namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
+namespace eg_unity_shared_tools.GameIconConfigurationTool.Code
 {
     public class IconToolSettingsModel
     {

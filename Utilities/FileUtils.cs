@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace eg_unity_shared_tools.Code.Editor.Utilities
+namespace eg_unity_shared_tools.Utilities
 {
     public static class FileUtils
     {

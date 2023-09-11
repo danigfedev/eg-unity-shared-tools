@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEditor;
 
-namespace eg_unity_shared_tools.Code.Editor.Utilities
+namespace eg_unity_shared_tools.Utilities.Editor
 {
     public class WindowWithTabs : EditorWindow
     {

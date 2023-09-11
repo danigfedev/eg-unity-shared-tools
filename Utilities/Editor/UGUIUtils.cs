@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace eg_unity_shared_tools.Code.Editor.Utilities
+namespace eg_unity_shared_tools.Utilities.Editor
 {
     public static class UGUIUtils
     {

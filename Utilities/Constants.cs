@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace eg_unity_shared_tools.Code
+namespace eg_unity_shared_tools.Utilities
 {
     public class Constants
     {

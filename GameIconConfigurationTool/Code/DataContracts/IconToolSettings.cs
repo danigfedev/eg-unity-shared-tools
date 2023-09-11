@@ -1,6 +1,6 @@
 using System;
 
-namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool.DataContracts
+namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.DataContracts
 {
     [Serializable]
     public class IconToolSettings
