@@ -12,21 +12,25 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
         private const string ImportFirstIconButtonLabel = "Import an icon";
         private const string ImportNewIconButtonLabel = "Import new icon";
         private const string DirectoryBrowserLabel = "Select a folder";
+        private const string AssetsDirectoryKey = "Assets";
+        private const string IconFileKey = "icon.png";
         
         private IconToolSettingsModel _settingsModel;
         private int _selectedOptionIndex;
         private string[] _iconSubdirectoryPaths;
         private string[] _iconSubdirectoryNames;
+        private GUIStyle _boldLabelStyle;
         
         public IconSelectionPanel(IconToolSettingsModel settingsModel)
         {
             _settingsModel = settingsModel;
+
+            _boldLabelStyle = new GUIStyle(EditorStyles.label);
+            _boldLabelStyle.fontStyle = FontStyle.Bold;
         }
         
         public void DrawPanel()
         {
-            GUILayout.Label("Icon Selection Tab");
-            
             //TODO: use a dirty flag that only changes when icons are loaded/added/removed
             
             if (!CheckExistingIcons())
@@ -36,12 +40,62 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             else
             {
                 SetIconNames(); //TODO maybe move this into CheckExistingIcons. This will be involved in teh DirtyFlag, for sure
-                _selectedOptionIndex = EditorGUILayout.Popup(_selectedOptionIndex, _iconSubdirectoryNames);
-                
-                //Show import new button in horizontal layout
-                //Show selected icon preview
-                //Show apply button
+
+                DrawIconPreviewSection();
+                DrawIconSelectionSection();
+                DrawSetIconsButtonSection();
             }
+        }
+
+        private void DrawIconPreviewSection()
+        {
+            var iconRelativePath = Path.Combine(AssetsDirectoryKey, _settingsModel.IconsRelativePath,
+                _iconSubdirectoryNames[_selectedOptionIndex], IconFileKey);
+            var iconTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(iconRelativePath);
+            if (iconTexture == null)
+            {
+                Debug.Log($"Icon texture is null. Path:{iconRelativePath}");
+                return;
+            }
+
+            UGUIUtils.HorizontalLayout(true, DrawPreview);
+
+            void DrawPreview()
+            {
+                UGUIUtils.VerticalLayout(false,
+                    () => GUILayout.Space(15),
+                    () => UGUIUtils.HorizontalLayout(true,
+                        () => GUILayout.Label("Icon preview:", _boldLabelStyle)),
+                    () => UGUIUtils.HorizontalLayout(true,
+                        () => GUILayout.Box(iconTexture, GUILayout.Width(128), GUILayout.Height(128))));
+            }
+        }
+        
+        private void DrawIconSelectionSection()
+        {
+            UGUIUtils.VerticalLayout(false,
+                () => GUILayout.Space(15),
+                () => GUILayout.Label("Icon selection:", _boldLabelStyle),
+                () => GUILayout.Space(5),
+                DrawIconSelection);
+            
+            void DrawIconSelection()
+            {
+                UGUIUtils.HorizontalLayout(false,
+                    DrawIconSelectionDropdown,
+                    () => UGUIUtils.DrawButton(ImportNewIconButtonLabel, ImportIcon));
+            
+                void DrawIconSelectionDropdown()
+                {
+                    _selectedOptionIndex = EditorGUILayout.Popup(_selectedOptionIndex, _iconSubdirectoryNames);
+                }
+            }
+        }
+        
+        private void DrawSetIconsButtonSection()
+        {
+            GUILayout.Space(15);
+            UGUIUtils.DrawButton("Set Game Icons", SetGameIcons);
         }
 
         private bool CheckExistingIcons()
@@ -112,6 +166,11 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             // - background.png (1024 x 1024)
             // - foreground.png (1024 x 1024)
             return true;
+        }
+
+        private void SetGameIcons()
+        {
+            
         }
     }
 }

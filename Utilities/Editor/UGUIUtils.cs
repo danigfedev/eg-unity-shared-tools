@@ -7,6 +7,34 @@ namespace eg_unity_shared_tools.Utilities.Editor
 {
     public static class UGUIUtils
     {
+        public static void HorizontalLayout(bool centerElements, params Action[] drawingMethods)
+        {
+            GUILayout.BeginHorizontal();
+            if(centerElements) GUILayout.FlexibleSpace();
+            
+            foreach (var drawMethod in drawingMethods)
+            {
+                drawMethod?.Invoke();
+            }
+            
+            if(centerElements) GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+
+        public static void VerticalLayout(bool centerElements, params Action[] drawingMethods)
+        {
+            GUILayout.BeginVertical();
+            if(centerElements) GUILayout.FlexibleSpace();
+            
+            foreach (var drawMethod in drawingMethods)
+            {
+                drawMethod?.Invoke();
+            }
+            
+            if(centerElements) GUILayout.FlexibleSpace();
+            GUILayout.EndVertical();
+        }
+        
         public static void DrawButton(string label, Action callback, params GUILayoutOption[] options)
         {
             if (GUILayout.Button(label, options))
