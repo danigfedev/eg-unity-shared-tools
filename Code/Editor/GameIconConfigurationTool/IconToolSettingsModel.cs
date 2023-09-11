@@ -14,20 +14,16 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
         public string IconsAbsolutePath => FileUtils.BuildAbsolutePathInProject(IconsRelativePath);
 
         private IconToolSettings _toolSettings;
-        private readonly string _defaultSettingsPath;
-        private readonly string _customSettingsPath;
+        
+        private readonly string _defaultSettingsPath = Path.Combine(Application.dataPath,
+            Constants.DefaultSettingsRelativePath, 
+            Constants.DefaultSettingsFileName);
+        
+        private readonly string _customSettingsPath = Path.Combine(Application.dataPath,
+            Constants.CustomSettingsRelativePath, 
+            Constants.CustomSettingsFileName);
+        
         private string _currentSettingsPath;
-
-        public IconToolSettingsModel()
-        {
-            _defaultSettingsPath = Path.Combine(Application.dataPath,
-                Constants.SettingRelativesPath, 
-                Constants.DefaultSettingsFileName);
-            
-            _customSettingsPath = Path.Combine(Application.dataPath,
-                Constants.SettingRelativesPath, 
-                Constants.CustomSettingsFileName);
-        }
 
         public void SetNewIconsRelativePath(string newPath)
         {
@@ -54,10 +50,18 @@ namespace eg_unity_shared_tools.Code.Editor.GameIconConfigurationTool
         
         public void SaveSettings()
         {
-            JsonFileManager.SaveJson(_toolSettings, _customSettingsPath);
-            AssetDatabase.Refresh();
+            try
+            {
+                FileUtils.TryCreateDirectory(_customSettingsPath);
+                JsonFileManager.SaveJson(_toolSettings, _customSettingsPath);
+                AssetDatabase.Refresh();
             
-            OnSettingsApplied?.Invoke();
+                OnSettingsApplied?.Invoke();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(exception.Message);
+            }
         }
     }
 }
