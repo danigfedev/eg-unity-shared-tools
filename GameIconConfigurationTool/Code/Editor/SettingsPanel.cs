@@ -32,11 +32,6 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             //TODO add a reset to default button? Where?
         }
 
-        public void UpdateIconsRelativePath()
-        {
-            throw new System.NotImplementedException();
-        }
-
         private void ApplySettings()
         {
             var oldIconsRelativePath = _settingsModel.IconsRelativePath;
@@ -67,11 +62,12 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 Directory.CreateDirectory(_settingsModel.IconsAbsolutePath);
             }
                 
-            string[] directories = null;
-            if (!FileUtils.DirectoryIsEmpty(oldIconsPath, ref directories))
+            (var hasSubdirectories, var subdirectories) = FileUtils.DirectoryHasSubDirectories(_settingsModel.IconsAbsolutePath);
+            
+            if (hasSubdirectories)
             {
                 DirectoryInfo directoryInfo = null;
-                foreach (var oldIconDirectory in directories)
+                foreach (var oldIconDirectory in subdirectories)
                 {
                     directoryInfo = new DirectoryInfo(oldIconDirectory);
                     var iconsFolderName = directoryInfo.Name;

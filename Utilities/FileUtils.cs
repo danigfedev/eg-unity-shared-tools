@@ -29,14 +29,11 @@ namespace eg_unity_shared_tools.Utilities
             }
         }
 
-        public static bool DirectoryIsEmpty(string directoryPath) =>
-            Directory.GetDirectories(directoryPath).Length == 0;
-
-        public static bool DirectoryIsEmpty(string directoryPath, ref string[] directories)
+        public static (bool, string[]) DirectoryHasSubDirectories(string directoryPath)
         {
-            directories = Directory.GetDirectories(directoryPath);
+            var subdirectories = Directory.GetDirectories(directoryPath);
 
-            return directories.Length == 0;
+            return (subdirectories.Length > 0, subdirectories);
         }
     }
 }

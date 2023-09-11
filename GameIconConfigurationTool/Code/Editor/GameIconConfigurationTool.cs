@@ -13,6 +13,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
         private static IconToolSettingsModel _settingsModel;
         private IIconsToolTabPanel _settingsPanel;
+        private IIconsToolTabPanel _iconSelectionPanel;
 
         [MenuItem(SharedConstants.BaseMenu + SharedConstants.ToolsMenu + nameof(GameIconConfigurationTool))]
         public static void ShowWindow()
@@ -40,7 +41,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             switch (_selectedTabIndex)
             {
                 case (int)GameIconToolTabs.SET_ICON:
-                    DrawSetIconTab();
+                    _iconSelectionPanel.DrawPanel();
                     break;
                 case (int)GameIconToolTabs.IMPORT_ICON:
                     DrawImportIconTab();
@@ -80,12 +81,19 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
         private void InitializeTabPanels()
         {
             _settingsPanel = new SettingsPanel(_settingsModel);
+            _iconSelectionPanel = new IconSelectionPanel(_settingsModel);
         }
 
+        //TODO Remove this, won´t be needed
         private static bool ToggleSetIconTabAccessibility()
         {
-            var blockSetIconTabAccess = !FileUtils.DirectoryExists(_settingsModel.IconsAbsolutePath) ||
-                                        FileUtils.DirectoryIsEmpty(_settingsModel.IconsAbsolutePath);
+            var blockSetIconTabAccess = !FileUtils.DirectoryExists(_settingsModel.IconsAbsolutePath);
+
+            if (!blockSetIconTabAccess)
+            {
+                (var hasSubdirectories, _) = FileUtils.DirectoryHasSubDirectories(_settingsModel.IconsAbsolutePath);
+                blockSetIconTabAccess = !hasSubdirectories;
+            }
             
             if (blockSetIconTabAccess)
             {
@@ -115,11 +123,6 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
         
         //DOUBT: How to handle Initialization? That can be abstracted, since it's specific of each tab
         // I can skip the Factory and creat the tabs here, by type. Then I can initialize them.
-
-        private void DrawSetIconTab()
-        {
-            GUILayout.Label("Set Icon Tab");
-        }
         
         private void DrawImportIconTab()
         {
