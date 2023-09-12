@@ -2,6 +2,7 @@ using System.IO;
 using eg_unity_shared_tools.Utilities;
 using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
+using UnityEngine;
 
 namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 {
@@ -22,41 +23,70 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             
             var hasChanges = !string.IsNullOrWhiteSpace(_unnapliedFolderRelativePath)
                          && _unnapliedFolderRelativePath != _settingsModel.IconsRelativePath;
-            
+
             UGUIUtils.DrawButton("Apply Changes", ApplySettings, hasChanges);
+            UGUIUtils.DrawButton("Reset to defaults", ResetToDefaults, _settingsModel.UsingCustomSettings);
+        }
+
+        private void ResetToDefaults()
+        {
+            var oldIconsPath = _settingsModel.IconsAbsolutePath;
+            _settingsModel.ResetToDefaultSettings();
+
+            ResetSettings();
             
-            //TODO add a reset to default button? Where?
+            void ResetSettings()
+            {
+                var newIconsPath = FileUtils.BuildAbsolutePathInProject(_settingsModel.IconsRelativePath);
+
+                var filesTransfered = false;
+                
+                if (oldIconsPath != _settingsModel.IconsAbsolutePath)
+                {
+                    filesTransfered = TryTransferFiles(oldIconsPath, newIconsPath);   
+                }
+                
+                if (filesTransfered)
+                {
+                    FileUtils.DeleteUnityDirectory(oldIconsPath, true);
+                    AssetDatabase.Refresh();
+                }
+
+                _unnapliedFolderRelativePath = _settingsModel.IconsRelativePath;
+                ClearTextFieldFocus();
+            }
         }
 
         private void ApplySettings()
         {
             var oldIconsRelativePath = _settingsModel.IconsRelativePath;
-            
-            _settingsModel.SetNewIconsRelativePath(_unnapliedFolderRelativePath);
-
             var oldIconsPath = FileUtils.BuildAbsolutePathInProject(oldIconsRelativePath);
-
-            var filesTransfered = TryTransferFiles(oldIconsPath);
             
-            _settingsModel.SaveSettings();
+            var newIconsPath = FileUtils.BuildAbsolutePathInProject(_unnapliedFolderRelativePath); //new test
+            var filesTransfered = TryTransferFiles(oldIconsPath, newIconsPath);
             
             if (filesTransfered)
             {
                 FileUtils.DeleteUnityDirectory(oldIconsPath, true);
                 AssetDatabase.Refresh();
             }
+
+            _settingsModel.SetNewIconsRelativePath(_unnapliedFolderRelativePath);
+            _settingsModel.SaveSettings();
+            
+            ClearTextFieldFocus();
         }
 
-        private bool TryTransferFiles(string oldIconsPath)
+        private bool TryTransferFiles(string oldIconsPath, string newIconsPath)
         {
             if (!FileUtils.DirectoryExists(oldIconsPath))
             {
                 return false; 
             }
 
-            if (!FileUtils.DirectoryExists(_settingsModel.IconsAbsolutePath))
+            if (!FileUtils.DirectoryExists(newIconsPath))
             {
-                Directory.CreateDirectory(_settingsModel.IconsAbsolutePath);
+                Directory.CreateDirectory(newIconsPath);
             }
                 
             (var hasSubdirectories, var subdirectories) = FileUtils.DirectoryHasSubDirectories(oldIconsPath);
@@ -68,13 +98,18 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 {
                     directoryInfo = new DirectoryInfo(oldIconDirectory);
                     var iconsFolderName = directoryInfo.Name;
-                    var destinationPath = Path.Combine(_settingsModel.IconsAbsolutePath, iconsFolderName);
+                    var destinationPath = Path.Combine(newIconsPath, iconsFolderName);
 
                     Directory.Move(oldIconDirectory, destinationPath);
                 }
             }
 
             return true;
+        }
+        
+        private static void ClearTextFieldFocus()
+        {
+            GUI.FocusControl(null);
         }
     }
 }

@@ -12,8 +12,10 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code
         public event Action OnSettingsApplied;
         public string IconsRelativePath => _toolSettings.IconsDirectory;
         public string IconsAbsolutePath => FileUtils.BuildAbsolutePathInProject(IconsRelativePath);
+        public bool UsingCustomSettings { get; private set; }
 
         private IconToolSettings _toolSettings;
+        private string _currentSettingsPath;
         
         private readonly string _defaultSettingsPath = Path.Combine(Application.dataPath,
             Constants.DefaultSettingsRelativePath, 
@@ -22,8 +24,6 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code
         private readonly string _customSettingsPath = Path.Combine(Application.dataPath,
             Constants.CustomSettingsRelativePath, 
             Constants.CustomSettingsFileName);
-        
-        private string _currentSettingsPath;
 
         public void SetNewIconsRelativePath(string newPath)
         {
@@ -36,6 +36,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code
             {
                 _currentSettingsPath = _customSettingsPath;
                 _toolSettings = JsonFileManager.LoadJson<IconToolSettings>(_customSettingsPath);
+                UsingCustomSettings = true;
             }
             else if (FileUtils.FileExists(_defaultSettingsPath))
             {
@@ -55,13 +56,25 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code
                 FileUtils.TryCreateDirectory(_customSettingsPath);
                 JsonFileManager.SaveJson(_toolSettings, _customSettingsPath);
                 AssetDatabase.Refresh();
-            
+
+                UsingCustomSettings = true;
+                
                 OnSettingsApplied?.Invoke();
             }
             catch (Exception exception)
             {
                 Debug.LogError(exception.Message);
             }
+        }
+        
+        public void ResetToDefaultSettings()
+        {
+            _currentSettingsPath = _defaultSettingsPath;
+            _toolSettings = JsonFileManager.LoadJson<IconToolSettings>(_defaultSettingsPath);
+            
+            File.Delete(_customSettingsPath);
+            
+            UsingCustomSettings = false;
         }
     }
 }
