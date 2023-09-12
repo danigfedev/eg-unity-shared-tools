@@ -2,7 +2,6 @@ using System.IO;
 using eg_unity_shared_tools.Utilities;
 using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
-using UnityEngine;
 
 namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 {
@@ -19,15 +18,12 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             
         public void DrawPanel()
         {
-            var hasChanges = false;
-            
             _unnapliedFolderRelativePath = EditorGUILayout.TextField("Icons path", _unnapliedFolderRelativePath);
             
-            hasChanges = _unnapliedFolderRelativePath != _settingsModel.IconsRelativePath;
-
-            GUI.enabled = hasChanges;
-            UGUIUtils.DrawButton("Apply Changes", ApplySettings);
-            GUI.enabled = true;
+            var hasChanges = !string.IsNullOrWhiteSpace(_unnapliedFolderRelativePath)
+                         && _unnapliedFolderRelativePath != _settingsModel.IconsRelativePath;
+            
+            UGUIUtils.DrawButton("Apply Changes", ApplySettings, hasChanges);
             
             //TODO add a reset to default button? Where?
         }
@@ -46,7 +42,8 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             
             if (filesTransfered)
             {
-                Directory.Delete(oldIconsPath);   
+                FileUtils.DeleteUnityDirectory(oldIconsPath, true);
+                AssetDatabase.Refresh();
             }
         }
 
@@ -62,7 +59,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 Directory.CreateDirectory(_settingsModel.IconsAbsolutePath);
             }
                 
-            (var hasSubdirectories, var subdirectories) = FileUtils.DirectoryHasSubDirectories(_settingsModel.IconsAbsolutePath);
+            (var hasSubdirectories, var subdirectories) = FileUtils.DirectoryHasSubDirectories(oldIconsPath);
             
             if (hasSubdirectories)
             {

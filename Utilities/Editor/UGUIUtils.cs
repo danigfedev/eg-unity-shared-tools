@@ -34,13 +34,21 @@ namespace eg_unity_shared_tools.Utilities.Editor
             if(centerElements) GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
         }
-        
-        public static void DrawButton(string label, Action callback, params GUILayoutOption[] options)
+
+        public static void DrawButton(string label, Action callback,
+            params GUILayoutOption[] options)
         {
+            DrawButton(label, callback, true, options);
+        }
+        
+        public static void DrawButton(string label, Action callback, bool interactable, params GUILayoutOption[] options)
+        {
+            GUI.enabled = interactable;
             if (GUILayout.Button(label, options))
             {
                 callback?.Invoke();
             }
+            GUI.enabled = true;
         }
 
         public static void DrawLockableButton(string label, Action callback, bool shouldDisableButton, params GUILayoutOption[] options)

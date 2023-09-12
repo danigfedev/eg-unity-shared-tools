@@ -5,6 +5,8 @@ namespace eg_unity_shared_tools.Utilities
 {
     public static class FileUtils
     {
+        private const string MetaFileExtension = ".meta";
+        
         public static string BuildAbsolutePathInProject(string relativePath)
         {
             return Path.Combine(Application.dataPath, relativePath);
@@ -29,6 +31,58 @@ namespace eg_unity_shared_tools.Utilities
             }
         }
 
+        public static void DeleteUnityDirectory(string path, bool recursive)
+        {
+            if (!DirectoryExists(path))
+            {
+                Debug.LogWarning("Directory does not exist. Aborting deletion");
+                return;
+            }
+
+            DeleteFiles();
+
+            if (recursive)
+            {
+                DeleteDirectories();
+                DeleteUnityFolder(path);
+            }
+            
+            #region Local methods
+            
+            void DeleteFiles()
+            {
+                var files = Directory.GetFiles(path);
+                
+                foreach (var file in files)
+                {
+                    File.Delete(file);
+                }
+            }
+
+            void DeleteDirectories()
+            {
+                var subdirectories = Directory.GetDirectories(path);
+                
+                foreach (var subdirectory in subdirectories)
+                {
+                    DeleteUnityDirectory(subdirectory, true);
+                    DeleteUnityFolder(subdirectory);
+                }
+            }
+
+            void DeleteUnityFolder(string folderPath)
+            {
+                var metaFile = folderPath + MetaFileExtension;
+
+                if (File.Exists(metaFile))
+                {
+                    File.Delete(metaFile);
+                }
+            }
+            
+            #endregion
+        }
+        
         public static (bool, string[]) DirectoryHasSubDirectories(string directoryPath)
         {
             var subdirectories = Directory.GetDirectories(directoryPath);
