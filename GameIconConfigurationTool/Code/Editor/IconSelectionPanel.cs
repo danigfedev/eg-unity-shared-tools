@@ -1,8 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using eg_unity_shared_tools.Utilities;
 using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
+using UnityEditor.Android;
 using UnityEngine;
 
 namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
@@ -14,11 +18,14 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
         private const string DirectoryBrowserLabel = "Select a folder";
         private const string AssetsDirectoryKey = "Assets";
         private const string IconFileKey = "icon.png";
+        private const bool DefaultTargetToggleStatus = true;
         
         private IconToolSettingsModel _settingsModel;
         private int _selectedOptionIndex;
         private string[] _iconSubdirectoryPaths;
         private string[] _iconSubdirectoryNames;
+
+        private Dictionary<BuildTargetGroup, bool> _buildTargetGroupToToggleStatusMap = new(); 
         private GUIStyle _boldLabelStyle;
         
         public IconSelectionPanel(IconToolSettingsModel settingsModel)
@@ -27,6 +34,8 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
             _boldLabelStyle = new GUIStyle(EditorStyles.label);
             _boldLabelStyle.fontStyle = FontStyle.Bold;
+            
+            GetValidBuildTargetGroups();
         }
         
         public void DrawPanel()
@@ -43,6 +52,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
                 DrawIconPreviewSection();
                 DrawIconSelectionSection();
+                DrawPlatformSelectionCheckboxes();
                 DrawSetIconsButtonSection();
             }
         }
@@ -92,12 +102,57 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             }
         }
         
+        private void DrawPlatformSelectionCheckboxes()
+        {
+            GUILayout.Space(15);
+
+            UGUIUtils.HorizontalLayout(false,
+                () => GUILayout.Label("Platform Selection:", _boldLabelStyle),
+                DrawPlatformSelectionToggles);
+
+            void DrawPlatformSelectionToggles()
+            {
+                var keys = _buildTargetGroupToToggleStatusMap.Keys.ToList();
+                foreach (var buildTargetGroup in keys)
+                {
+                    var togglePressed = _buildTargetGroupToToggleStatusMap[buildTargetGroup];
+                    _buildTargetGroupToToggleStatusMap[buildTargetGroup] = GUILayout.Toggle(togglePressed, buildTargetGroup.ToString(), "Button");
+                }
+            }
+        }
+        
         private void DrawSetIconsButtonSection()
         {
             GUILayout.Space(15);
             UGUIUtils.DrawButton("Set Game Icons", SetGameIcons);
         }
 
+        private void GetValidBuildTargetGroups()
+        {
+            var buildTargetGroupList = (BuildTargetGroup[])Enum.GetValues(typeof(BuildTargetGroup));
+            var buildTargetList = (BuildTarget[])Enum.GetValues(typeof(BuildTarget));
+            
+            foreach (var buildTargetGroup in buildTargetGroupList)
+            {
+                if (buildTargetGroup == BuildTargetGroup.Unknown)
+                {
+                    continue;
+                }
+                
+                foreach (var buildTarget in buildTargetList)
+                {
+                    var isPlatformSupported = BuildPipeline.IsBuildTargetSupported(buildTargetGroup, buildTarget)
+                                              && !_buildTargetGroupToToggleStatusMap.TryGetValue(buildTargetGroup,
+                                                  out _);
+                    
+                    if (isPlatformSupported)
+                    {
+                        _buildTargetGroupToToggleStatusMap.Add(buildTargetGroup, DefaultTargetToggleStatus);
+                    }
+                }
+            }
+        }
+        
         private bool CheckExistingIcons()
         {
             bool existingIcons;
@@ -170,7 +225,20 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
         private void SetGameIcons()
         {
+            // var icons = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.Android);
             
+            //TODO PlatformIconKindResolver static class that receives an BuildTargetGroup and returns an array of PlatformIconKind
+            // So, for BuildTargetGroup.Android, it would get all PlatformIconKind fields (Legacy, Round and Adaptive);
+            //An idea that comes to mind is to get them by reflection, so I can say get all fields of type PlatformIconKind
+            
+            // Example code: ***********************************************************************************************************
+            // Obtén todos los campos estáticos de la clase AndroidPlatformIconKind
+            // FieldInfo[] fields = typeof(AndroidPlatformIconKind).GetFields(BindingFlags.Public | BindingFlags.Static);
+
+            // Filtra los campos que son del tipo PlatformIconKind
+            // var platformIconKinds = Array.FindAll(fields, field => field.FieldType == typeof(PlatformIconKind));
+            
+            // var icons = PlayerSettings.GetPlatformIcons(BuildTargetGroup.Android, AndroidPlatformIconKind.Legacy);
         }
     }
 }
