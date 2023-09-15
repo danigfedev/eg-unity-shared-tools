@@ -59,8 +59,8 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 
         private void DrawImportFirstIconSection()
         {
-            UGUIUtils.DrawSpace(10);
-            UGUIUtils.DrawDirectoryBrowserButton(DirectoryBrowserLabel, "", "",
+            GUIUtils.DrawSpace(10);
+            GUIUtils.DrawDirectoryBrowserButton(DirectoryBrowserLabel, "", "",
                 ImportFirstIconButtonLabel, ImportIcon);
         }
 
@@ -75,33 +75,33 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
                 return;
             }
 
-            UGUIUtils.DrawSpace(10);
-            UGUIUtils.HorizontalLayout(true, DrawPreview);
+            GUIUtils.DrawSpace(10);
+            GUIUtils.HorizontalLayout(true, DrawPreview);
 
             void DrawPreview()
             {
-                UGUIUtils.VerticalLayout(false,
-                    () => UGUIUtils.DrawSpace(15),
-                    () => UGUIUtils.HorizontalLayout(true,
+                GUIUtils.VerticalLayout(false,
+                    () => GUIUtils.DrawSpace(15),
+                    () => GUIUtils.HorizontalLayout(true,
                         () => GUILayout.Label("Icon preview:", _boldLabelStyle)),
-                    () => UGUIUtils.HorizontalLayout(true,
+                    () => GUIUtils.HorizontalLayout(true,
                         () => GUILayout.Box(iconTexture, GUILayout.Width(128), GUILayout.Height(128))));
             }
         }
         
         private void DrawIconSelectionSection()
         {
-            UGUIUtils.VerticalLayout(false,
-                () => UGUIUtils.DrawSpace(15),
+            GUIUtils.VerticalLayout(false,
+                () => GUIUtils.DrawSpace(15),
                 () => GUILayout.Label("Icon selection:", _boldLabelStyle),
-                () => UGUIUtils.DrawSpace(5),
+                () => GUIUtils.DrawSpace(5),
                 DrawIconSelection);
             
             void DrawIconSelection()
             {
-                UGUIUtils.HorizontalLayout(false,
+                GUIUtils.HorizontalLayout(false,
                     DrawIconSelectionDropdown,
-                    () => UGUIUtils.DrawDirectoryBrowserButton(DirectoryBrowserLabel, "", "",
+                    () => GUIUtils.DrawDirectoryBrowserButton(DirectoryBrowserLabel, "", "",
                         ImportNewIconButtonLabel, ImportIcon));
             
                 void DrawIconSelectionDropdown()
@@ -113,9 +113,9 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
         
         private void DrawPlatformSelectionCheckboxes()
         {
-            UGUIUtils.DrawSpace(15);
+            GUIUtils.DrawSpace(15);
 
-            UGUIUtils.HorizontalLayout(false,
+            GUIUtils.HorizontalLayout(false,
                 () => GUILayout.Label("Platform Selection:", _boldLabelStyle),
                 DrawPlatformSelectionToggles);
 
@@ -132,8 +132,8 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
         
         private void DrawSetIconsButtonSection()
         {
-            UGUIUtils.DrawSpace(15);
-            UGUIUtils.DrawButton("Set Game Icons", SetGameIcons);
+            GUIUtils.DrawSpace(15);
+            GUIUtils.DrawButton("Set Game Icons", SetGameIcons);
         }
 
         private void GetValidBuildTargetGroups()

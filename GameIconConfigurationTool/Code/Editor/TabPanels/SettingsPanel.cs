@@ -23,7 +23,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
             
         public void DrawPanel()
         {
-            UGUIUtils.VerticalLayout(false,
+            GUIUtils.VerticalLayout(false,
                 DrawPathEditTextField,
                 DrawApplySettingsButton,
                 DrawResetSettingsButton);
@@ -31,25 +31,25 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 
         private void DrawPathEditTextField()
         {
-            UGUIUtils.DrawSpace(10);
+            GUIUtils.DrawSpace(10);
             _unnapliedFolderRelativePath =
                 EditorGUILayout.TextField(_textFieldGUIContent, _unnapliedFolderRelativePath);
         }
 
         private void DrawApplySettingsButton()
         {
-            UGUIUtils.DrawSpace(15);
+            GUIUtils.DrawSpace(15);
             var blockInteraction = string.IsNullOrWhiteSpace(_unnapliedFolderRelativePath)
                              || _unnapliedFolderRelativePath == _settingsModel.IconsRelativePath;
 
-            UGUIUtils.DrawButton("Apply Changes", ApplySettings, blockInteraction);
+            GUIUtils.DrawButton("Apply Changes", ApplySettings, blockInteraction);
         }
         
         private void DrawResetSettingsButton()
         {
-            UGUIUtils.DrawSpace(10);
+            GUIUtils.DrawSpace(10);
             var blockInteraction = !_settingsModel.UsingCustomSettings;
-            UGUIUtils.DrawButton("Reset to defaults", ResetToDefaults, blockInteraction);
+            GUIUtils.DrawButton("Reset to defaults", ResetToDefaults, blockInteraction);
         }
 
         private void ResetToDefaults()

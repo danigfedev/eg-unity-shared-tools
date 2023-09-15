@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace eg_unity_shared_tools.Utilities.Editor
 {
-    public static class UGUIUtils
+    public static class GUIUtils
     {
         private static readonly string[] TabStyles = 
         {
@@ -28,21 +28,33 @@ namespace eg_unity_shared_tools.Utilities.Editor
             GUILayout.EndHorizontal();
         }
 
+        public static void VerticalLayout(GUIStyle style, bool centerElements, params Action[] drawingMethods)
+        {
+            GUILayout.BeginVertical(style);
+            DrawVerticalLayoutContents(centerElements, drawingMethods);
+            GUILayout.EndVertical();
+        }
+        
         public static void VerticalLayout(bool centerElements, params Action[] drawingMethods)
         {
             GUILayout.BeginVertical();
-            if(centerElements) GUILayout.FlexibleSpace();
-            
+            DrawVerticalLayoutContents(centerElements, drawingMethods);
+            GUILayout.EndVertical();
+        }
+
+        private static void DrawVerticalLayoutContents(bool centerElements, Action[] drawingMethods)
+        {
+            if (centerElements) GUILayout.FlexibleSpace();
+
             foreach (var drawMethod in drawingMethods)
             {
                 drawMethod?.Invoke();
             }
-            
-            if(centerElements) GUILayout.FlexibleSpace();
-            GUILayout.EndVertical();
+
+            if (centerElements) GUILayout.FlexibleSpace();
         }
 
-        public static void DrawSpace(float pixels) => EditorGUILayout.Space(pixels);
+        public static void DrawSpace(float pixels) => GUILayout.Space(pixels);
 
         public static void DrawButton(string label, Action callback,
             params GUILayoutOption[] options)
@@ -131,5 +143,7 @@ namespace eg_unity_shared_tools.Utilities.Editor
         {
             return EditorUtility.OpenFilePanel(browserTitle, baseDirectory, extension);
         }
+
+        public static void DrawLabel(string label, GUIStyle style) => GUILayout.Label(label, style);
     }
 }

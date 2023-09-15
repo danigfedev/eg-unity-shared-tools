@@ -31,39 +31,60 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
 
         private void OnGUI()
         {
-            UGUIUtils.DrawSpace(10);
+            DrawAssetBundleFilePickerSection();
+            DrawLoadBundleButton();
+            DrawBundleContentsSection();
+            DrawSaveButtonSection();
 
-            GUILayout.Label("Select an asset bundle file", EditorStyles.boldLabel);
-
-            EditorGUILayout.BeginHorizontal();
-
-            _assetBundleFilePath = EditorGUILayout.TextField(_assetBundleFilePath);
-            UGUIUtils.DrawFileBrowserButton("Pick an Asset Bundle", "", "",
-                "...", SetAssetBundlePath, GUILayout.Width(25));
-
-            EditorGUILayout.EndHorizontal();
-            
-            UGUIUtils.DrawSpace(10);
-
-            var disableLoadButtonInteraction = string.IsNullOrWhiteSpace(_assetBundleFilePath);
-            UGUIUtils.DrawButton("Load Asset Bundle", ListAssetBundleContents, disableLoadButtonInteraction);
-            
-            EditorGUILayout.BeginVertical(boxStyle);
-            
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(200));
-            GUILayout.Label(_assetBundleContentList, GUILayout.ExpandHeight(true));
-            EditorGUILayout.EndScrollView();
-            
-            EditorGUILayout.EndVertical();
-
-            UGUIUtils.DrawSpace(10);
-
-            var disableExportButtonInteraction = string.IsNullOrWhiteSpace(_assetBundleContentList);
-            UGUIUtils.DrawButton("Export contents to txt", ExportContentListToFile, disableExportButtonInteraction);
-            
             Repaint();
         }
 
+        private void DrawAssetBundleFilePickerSection()
+        {
+            GUIUtils.DrawSpace(10);
+            GUIUtils.DrawLabel("Select an asset bundle file", EditorStyles.boldLabel);
+            GUIUtils.HorizontalLayout(false, DrawTextField, DrawFilePickerButton);
+
+            void DrawTextField()
+            {
+                _assetBundleFilePath = EditorGUILayout.TextField(_assetBundleFilePath);
+            }
+
+            void DrawFilePickerButton()
+            {
+                GUIUtils.DrawFileBrowserButton("Pick an Asset Bundle", "", "",
+                    "...", SetAssetBundlePath, GUILayout.Width(25));
+            }
+        }
+        
+        private void DrawLoadBundleButton()
+        {
+            var disableLoadButtonInteraction = string.IsNullOrWhiteSpace(_assetBundleFilePath);
+            GUIUtils.DrawSpace(10);
+            GUIUtils.DrawButton("Load Asset Bundle", ListAssetBundleContents, disableLoadButtonInteraction);
+        }
+
+        private void DrawBundleContentsSection()
+        {
+            GUIUtils.DrawSpace(10);
+            GUIUtils.DrawLabel("Asset bundle contents:", EditorStyles.boldLabel);
+            GUIUtils.VerticalLayout(boxStyle, false, DrawScrollView);
+
+            void DrawScrollView()
+            {
+                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(200));
+                GUILayout.Label(_assetBundleContentList, GUILayout.ExpandHeight(true));
+                EditorGUILayout.EndScrollView();
+            }
+        }
+        
+        private void DrawSaveButtonSection()
+        {
+            var disableExportButtonInteraction = string.IsNullOrWhiteSpace(_assetBundleContentList);
+            GUIUtils.DrawSpace(10);
+            GUIUtils.DrawButton("Export contents to txt", ExportContentListToFile, disableExportButtonInteraction);
+        }
+        
         private void SetAssetBundlePath(string filePath)
         {
             _assetBundleFilePath = filePath;
@@ -125,5 +146,4 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
             return stringBuilder.ToString();
         }
     }
-
 }
