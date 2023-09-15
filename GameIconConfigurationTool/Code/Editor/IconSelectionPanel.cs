@@ -7,6 +7,7 @@ using eg_unity_shared_tools.Utilities;
 using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
 using UnityEditor.Android;
+using UnityEditor.Build;
 using UnityEngine;
 
 namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
@@ -18,6 +19,8 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
         private const string DirectoryBrowserLabel = "Select a folder";
         private const string AssetsDirectoryKey = "Assets";
         private const string IconFileKey = "icon.png";
+        private const string BackgroundFileKey = "background.png";
+        private const string ForegroundFileKey = "foreground.png";
         private const bool DefaultTargetToggleStatus = true;
         
         private IconToolSettingsModel _settingsModel;
@@ -200,7 +203,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 Debug.LogWarning($"Error importing {selectedDirectory}. There´s already an icon folder with the same name.");
                 return;
             }
-
+            
             if (!CheckSelectedDirectoryValidity())
             {
                 Debug.LogWarning($"Error importing {selectedDirectory}. The contents of the directory are not valid.");
@@ -225,20 +228,22 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
         private void SetGameIcons()
         {
-            // var icons = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.Android);
+            var iconRelativePath = Path.Combine(AssetsDirectoryKey, _settingsModel.IconsRelativePath,
+                _iconSubdirectoryNames[_selectedOptionIndex], IconFileKey);
             
-            //TODO PlatformIconKindResolver static class that receives an BuildTargetGroup and returns an array of PlatformIconKind
-            // So, for BuildTargetGroup.Android, it would get all PlatformIconKind fields (Legacy, Round and Adaptive);
-            //An idea that comes to mind is to get them by reflection, so I can say get all fields of type PlatformIconKind
+            var backgroundRelativePath = Path.Combine(AssetsDirectoryKey, _settingsModel.IconsRelativePath,
+                _iconSubdirectoryNames[_selectedOptionIndex], BackgroundFileKey);
             
-            // Example code: ***********************************************************************************************************
-            // Obtén todos los campos estáticos de la clase AndroidPlatformIconKind
-            // FieldInfo[] fields = typeof(AndroidPlatformIconKind).GetFields(BindingFlags.Public | BindingFlags.Static);
+            var foregroundRelativePath = Path.Combine(AssetsDirectoryKey, _settingsModel.IconsRelativePath,
+                _iconSubdirectoryNames[_selectedOptionIndex], ForegroundFileKey);
 
-            // Filtra los campos que son del tipo PlatformIconKind
-            // var platformIconKinds = Array.FindAll(fields, field => field.FieldType == typeof(PlatformIconKind));
-            
-            // var icons = PlayerSettings.GetPlatformIcons(BuildTargetGroup.Android, AndroidPlatformIconKind.Legacy);
+            var baseIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(iconRelativePath);
+            var backgroundIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(backgroundRelativePath);
+            var foregroundIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(foregroundRelativePath);
+
+            PlatformIconConfigurationManager.SetDefaultIcon(baseIcon);
+            PlatformIconConfigurationManager.SetIconsForBuildTargetGroup(baseIcon,
+                backgroundIcon, foregroundIcon, _buildTargetGroupToToggleStatusMap);
         }
     }
 }

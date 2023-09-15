@@ -5,10 +5,19 @@ namespace eg_unity_shared_tools.Utilities
 {
     public static class FileUtils
     {
+        private const string AssetsDirectoryName = "Assets";
         private const string MetaFileExtension = ".meta";
         
         public static string BuildAbsolutePathInProject(string relativePath)
         {
+            var split = relativePath.Split(Path.DirectorySeparatorChar);
+            var fixedPath = string.Empty;
+            
+            if (split[0] == AssetsDirectoryName)
+            {
+                var stringToReplace = split[0] + Path.DirectorySeparatorChar;
+                relativePath = relativePath.Replace(stringToReplace, "");
+            }
             return Path.Combine(Application.dataPath, relativePath);
         }
 
