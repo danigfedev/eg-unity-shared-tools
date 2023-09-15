@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using eg_unity_shared_tools.Utilities;
 using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
-using UnityEditor.Android;
-using UnityEditor.Build;
 using UnityEngine;
 
 namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
@@ -204,7 +201,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
                 return;
             }
             
-            if (!CheckSelectedDirectoryValidity())
+            if (!CheckSelectedDirectoryValidity(selectedDirectoryInfo))
             {
                 Debug.LogWarning($"Error importing {selectedDirectory}. The contents of the directory are not valid.");
                 return;
@@ -215,14 +212,32 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
             AssetDatabase.Refresh();
         }
 
-        private bool CheckSelectedDirectoryValidity()
+        private bool CheckSelectedDirectoryValidity(DirectoryInfo iconDirectoryInfo)
         {
-            //TODO: define validity rules (count number of images in folder, and maybe check names?)
-            
             //Directory will have three images (presumably png files):
             // - icon.png (1024 x 1024)
             // - background.png (1024 x 1024)
             // - foreground.png (1024 x 1024)
+            
+            var files = iconDirectoryInfo.GetFiles();
+
+            if (files.Length != 3)
+            {
+                return false;
+            }
+
+            foreach (var file in files)
+            {
+                var isValid = file.Name.Contains(IconFileKey) 
+                              || file.Name.Contains(BackgroundFileKey)
+                              || file.Name.Contains(ForegroundFileKey);
+
+                if (!isValid)
+                {
+                    return false;
+                }
+            }
+            
             return true;
         }
 
