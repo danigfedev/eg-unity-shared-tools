@@ -7,6 +7,13 @@ namespace eg_unity_shared_tools.Utilities.Editor
 {
     public static class UGUIUtils
     {
+        private static readonly string[] TabStyles = 
+        {
+            "ButtonLeft",
+            "ButtonMid",
+            "ButtonRight"
+        };
+        
         public static void HorizontalLayout(bool centerElements, params Action[] drawingMethods)
         {
             GUILayout.BeginHorizontal();
@@ -35,36 +42,26 @@ namespace eg_unity_shared_tools.Utilities.Editor
             GUILayout.EndVertical();
         }
 
+        public static void DrawSpace(float pixels) => EditorGUILayout.Space(pixels);
+
         public static void DrawButton(string label, Action callback,
             params GUILayoutOption[] options)
         {
-            DrawButton(label, callback, true, options);
+            DrawButton(label, callback, false, options);
         }
-        
-        public static void DrawButton(string label, Action callback, bool interactable, params GUILayoutOption[] options)
+
+        public static void DrawButton(string label, Action callback, bool disableInteraction,
+            params GUILayoutOption[] options)
         {
-            GUI.enabled = interactable;
+            EditorGUI.BeginDisabledGroup(disableInteraction);
             if (GUILayout.Button(label, options))
             {
                 callback?.Invoke();
             }
-            GUI.enabled = true;
-        }
 
-        public static void DrawLockableButton(string label, Action callback, bool shouldDisableButton, params GUILayoutOption[] options)
-        {
-            EditorGUI.BeginDisabledGroup(shouldDisableButton);
-            DrawButton(label, callback, options);
             EditorGUI.EndDisabledGroup();
         }
 
-        private static readonly string[] TabStyles = 
-        {
-            "ButtonLeft",
-            "ButtonMid",
-            "ButtonRight"
-        };
-        
         public static int DrawTabs(int selectedTabIndex, string[] tabNames, int[] disabledTabsIndexes = null)
         {
             GUILayout.BeginHorizontal();
@@ -90,6 +87,49 @@ namespace eg_unity_shared_tools.Utilities.Editor
             GUILayout.EndHorizontal();
 
             return selectedTabIndex;
+        }
+
+        public static void DrawDirectoryBrowserButton(string browserTitle,
+            string baseDirectory, string defaultName, string buttonLabel, Action<string> callback, params GUILayoutOption[] options)
+        {
+            DrawDirectoryBrowserButton(browserTitle, baseDirectory, defaultName, buttonLabel, callback, false, options);
+        }
+        
+        public static void DrawDirectoryBrowserButton(string browserTitle, string baseDirectory, string defaultName, string buttonLabel, Action<string> callback, bool disableButton, params GUILayoutOption[] options)
+        {
+            DrawButton(buttonLabel, OpenBrowser, disableButton, options);
+            
+            void OpenBrowser()
+            {
+                var path = OpenDirectoryBrowser(browserTitle, baseDirectory, defaultName);
+                callback?.Invoke(path);
+            }
+        }
+
+        public static void DrawFileBrowserButton(string browserTitle, string baseDirectory, string extension, string buttonLabel, Action<string> callback, params GUILayoutOption[] options)
+        {
+            DrawFileBrowserButton(browserTitle, baseDirectory, extension, buttonLabel, callback, false, options);
+        }
+
+        public static void DrawFileBrowserButton(string browserTitle, string baseDirectory, string extension, string buttonLabel, Action<string> callback, bool disableButton, params GUILayoutOption[] options)
+        {
+            DrawButton(buttonLabel, OpenBrowser, disableButton, options);
+            
+            void OpenBrowser()
+            {
+                var path = OpenFileBrowser(browserTitle, baseDirectory, extension);
+                callback?.Invoke(path);
+            }
+        }
+        
+        public static string OpenDirectoryBrowser(string browserTitle, string baseDirectory, string defaultName)
+        {
+            return EditorUtility.OpenFolderPanel(browserTitle, baseDirectory, defaultName);
+        }
+
+        public static string OpenFileBrowser(string browserTitle, string baseDirectory, string extension)
+        {
+            return EditorUtility.OpenFilePanel(browserTitle, baseDirectory, extension);
         }
     }
 }
