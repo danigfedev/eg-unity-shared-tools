@@ -5,7 +5,7 @@ using eg_unity_shared_tools.Utilities;
 using UnityEditor;
 using UnityEngine;
 
-namespace eg_unity_shared_tools.GameIconConfigurationTool.Code
+namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 {
     public class IconToolSettingsModel
     {

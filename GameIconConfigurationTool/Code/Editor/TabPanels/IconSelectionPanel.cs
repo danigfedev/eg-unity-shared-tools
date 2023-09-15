@@ -7,7 +7,7 @@ using eg_unity_shared_tools.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
+namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 {
     public class IconSelectionPanel : IIconsToolTabPanel
     {

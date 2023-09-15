@@ -1,4 +1,4 @@
-namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
+namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 {
     public interface IIconsToolTabPanel
     {
