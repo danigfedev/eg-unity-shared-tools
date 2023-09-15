@@ -59,8 +59,9 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 
         private void DrawImportFirstIconSection()
         {
-            GUILayout.Space(10);
-            UGUIUtils.DrawButton(ImportFirstIconButtonLabel, ImportIcon);
+            UGUIUtils.DrawSpace(10);
+            UGUIUtils.DrawDirectoryBrowserButton(DirectoryBrowserLabel, "", "",
+                ImportFirstIconButtonLabel, ImportIcon);
         }
 
         private void DrawIconPreviewSection()
@@ -74,13 +75,13 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
                 return;
             }
 
-            GUILayout.Space(10);
+            UGUIUtils.DrawSpace(10);
             UGUIUtils.HorizontalLayout(true, DrawPreview);
 
             void DrawPreview()
             {
                 UGUIUtils.VerticalLayout(false,
-                    () => GUILayout.Space(15),
+                    () => UGUIUtils.DrawSpace(15),
                     () => UGUIUtils.HorizontalLayout(true,
                         () => GUILayout.Label("Icon preview:", _boldLabelStyle)),
                     () => UGUIUtils.HorizontalLayout(true,
@@ -91,16 +92,17 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
         private void DrawIconSelectionSection()
         {
             UGUIUtils.VerticalLayout(false,
-                () => GUILayout.Space(15),
+                () => UGUIUtils.DrawSpace(15),
                 () => GUILayout.Label("Icon selection:", _boldLabelStyle),
-                () => GUILayout.Space(5),
+                () => UGUIUtils.DrawSpace(5),
                 DrawIconSelection);
             
             void DrawIconSelection()
             {
                 UGUIUtils.HorizontalLayout(false,
                     DrawIconSelectionDropdown,
-                    () => UGUIUtils.DrawButton(ImportNewIconButtonLabel, ImportIcon));
+                    () => UGUIUtils.DrawDirectoryBrowserButton(DirectoryBrowserLabel, "", "",
+                        ImportNewIconButtonLabel, ImportIcon));
             
                 void DrawIconSelectionDropdown()
                 {
@@ -111,7 +113,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
         
         private void DrawPlatformSelectionCheckboxes()
         {
-            GUILayout.Space(15);
+            UGUIUtils.DrawSpace(15);
 
             UGUIUtils.HorizontalLayout(false,
                 () => GUILayout.Label("Platform Selection:", _boldLabelStyle),
@@ -130,7 +132,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
         
         private void DrawSetIconsButtonSection()
         {
-            GUILayout.Space(15);
+            UGUIUtils.DrawSpace(15);
             UGUIUtils.DrawButton("Set Game Icons", SetGameIcons);
         }
 
@@ -196,25 +198,29 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
             _iconSubdirectoryNames = iconNames;
         }
         
-        private void ImportIcon()
+        private void ImportIcon(string directoryPath)
         {
-            var selectedDirectory = EditorUtility.OpenFolderPanel(DirectoryBrowserLabel, "", "");
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                Debug.LogWarning("No directory provided. Aborting process");
+                return;
+            }
             
-            var selectedDirectoryInfo = new DirectoryInfo(selectedDirectory);
+            var selectedDirectoryInfo = new DirectoryInfo(directoryPath);
             
             if (_iconSubdirectoryNames != null && _iconSubdirectoryNames.Contains(selectedDirectoryInfo.Name))
             {
-                Debug.LogWarning($"Error importing {selectedDirectory}. There´s already an icon folder with the same name.");
+                Debug.LogWarning($"Error importing {directoryPath}. There´s already an icon folder with the same name.");
                 return;
             }
             
             if (!CheckSelectedDirectoryValidity(selectedDirectoryInfo))
             {
-                Debug.LogWarning($"Error importing {selectedDirectory}. The contents of the directory are not valid.");
+                Debug.LogWarning($"Error importing {directoryPath}. The contents of the directory are not valid.");
                 return;
             }
             
-            FileUtils.CopyDirectory(selectedDirectory, _settingsModel.IconsAbsolutePath);
+            FileUtils.CopyDirectory(directoryPath, _settingsModel.IconsAbsolutePath);
 
             AssetDatabase.Refresh();
         }

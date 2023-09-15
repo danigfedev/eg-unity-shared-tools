@@ -11,7 +11,7 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
     {
         private static Vector2 minSize = new Vector2(300, 320);
         
-        private string assetBundleFilePath = "";
+        private string _assetBundleFilePath = "";
         private string _assetBundleContentList = "";
         private int _numLines;
         private Vector2 scrollPosition;
@@ -28,24 +28,25 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
         {
             boxStyle = CustomEditorStyles.CreateTextFieldStyle();
         }
-        
+
         private void OnGUI()
         {
-            EditorGUILayout.Space(10);
-            
+            UGUIUtils.DrawSpace(10);
+
             GUILayout.Label("Select an asset bundle file", EditorStyles.boldLabel);
-            
+
             EditorGUILayout.BeginHorizontal();
-            
-            assetBundleFilePath = EditorGUILayout.TextField(assetBundleFilePath);
-            UGUIUtils.DrawButton("...", OpenFileBrowser, GUILayout.Width(25));
-            
+
+            _assetBundleFilePath = EditorGUILayout.TextField(_assetBundleFilePath);
+            UGUIUtils.DrawFileBrowserButton("Pick an Asset Bundle", "", "",
+                "...", SetAssetBundlePath, GUILayout.Width(25));
+
             EditorGUILayout.EndHorizontal();
             
-            EditorGUILayout.Space(10);
+            UGUIUtils.DrawSpace(10);
 
-            var shouldDisableLoadButton = string.IsNullOrWhiteSpace(assetBundleFilePath);
-            UGUIUtils.DrawLockableButton("Load Asset Bundle", ListAssetBundleContents, shouldDisableLoadButton);
+            var disableLoadButtonInteraction = string.IsNullOrWhiteSpace(_assetBundleFilePath);
+            UGUIUtils.DrawButton("Load Asset Bundle", ListAssetBundleContents, disableLoadButtonInteraction);
             
             EditorGUILayout.BeginVertical(boxStyle);
             
@@ -55,26 +56,26 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
             
             EditorGUILayout.EndVertical();
 
-            EditorGUILayout.Space(10);
+            UGUIUtils.DrawSpace(10);
 
-            var shouldDisableExportButton = string.IsNullOrWhiteSpace(_assetBundleContentList);
-            UGUIUtils.DrawLockableButton("Export contents to txt", ExportContentListToFile, shouldDisableExportButton);
+            var disableExportButtonInteraction = string.IsNullOrWhiteSpace(_assetBundleContentList);
+            UGUIUtils.DrawButton("Export contents to txt", ExportContentListToFile, disableExportButtonInteraction);
             
             Repaint();
         }
 
-        private void OpenFileBrowser() // TODO This could be defined in utils class too
+        private void SetAssetBundlePath(string filePath)
         {
-            assetBundleFilePath = EditorUtility.OpenFilePanel("Pick an Asset Bundle", "", "");
+            _assetBundleFilePath = filePath;
         }
-        
+
         private void ListAssetBundleContents()
         {
             _numLines = 0;
             
-            if (!string.IsNullOrEmpty(assetBundleFilePath) && File.Exists(assetBundleFilePath))
+            if (!string.IsNullOrEmpty(_assetBundleFilePath) && File.Exists(_assetBundleFilePath))
             {
-                AssetBundle assetBundle = AssetBundle.LoadFromFile(assetBundleFilePath);
+                AssetBundle assetBundle = AssetBundle.LoadFromFile(_assetBundleFilePath);
                 if (assetBundle != null)
                 {
                     string[] assetNames = assetBundle.GetAllAssetNames();
@@ -111,11 +112,11 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
 
         private string BuildOutput()
         {
-            var bundleName = Path.GetFileNameWithoutExtension(assetBundleFilePath);
+            var bundleName = Path.GetFileNameWithoutExtension(_assetBundleFilePath);
             var stringBuilder = new StringBuilder();
                     
             stringBuilder.AppendLine($"List of contents of bundle: {bundleName}");
-            stringBuilder.AppendLine($"Bundle path: {assetBundleFilePath}");
+            stringBuilder.AppendLine($"Bundle path: {_assetBundleFilePath}");
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("====================================================================================");
             stringBuilder.AppendLine();

@@ -31,24 +31,25 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 
         private void DrawPathEditTextField()
         {
-            GUILayout.Space(10);
+            UGUIUtils.DrawSpace(10);
             _unnapliedFolderRelativePath =
                 EditorGUILayout.TextField(_textFieldGUIContent, _unnapliedFolderRelativePath);
         }
 
         private void DrawApplySettingsButton()
         {
-            GUILayout.Space(15);
-            var hasChanges = !string.IsNullOrWhiteSpace(_unnapliedFolderRelativePath)
-                             && _unnapliedFolderRelativePath != _settingsModel.IconsRelativePath;
+            UGUIUtils.DrawSpace(15);
+            var blockInteraction = string.IsNullOrWhiteSpace(_unnapliedFolderRelativePath)
+                             || _unnapliedFolderRelativePath == _settingsModel.IconsRelativePath;
 
-            UGUIUtils.DrawButton("Apply Changes", ApplySettings, hasChanges);
+            UGUIUtils.DrawButton("Apply Changes", ApplySettings, blockInteraction);
         }
         
         private void DrawResetSettingsButton()
         {
-            GUILayout.Space(10);
-            UGUIUtils.DrawButton("Reset to defaults", ResetToDefaults, _settingsModel.UsingCustomSettings);
+            UGUIUtils.DrawSpace(10);
+            var blockInteraction = !_settingsModel.UsingCustomSettings;
+            UGUIUtils.DrawButton("Reset to defaults", ResetToDefaults, blockInteraction);
         }
 
         private void ResetToDefaults()
