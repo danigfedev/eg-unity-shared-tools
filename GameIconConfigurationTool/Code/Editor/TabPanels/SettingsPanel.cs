@@ -10,21 +10,44 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
     {
         private IconToolSettingsModel _settingsModel;
         private string _unnapliedFolderRelativePath = "";
+        private GUIContent _textFieldGUIContent;
 
         public SettingsPanel(IconToolSettingsModel settingsModel)
         {
             _settingsModel = settingsModel;
             _unnapliedFolderRelativePath = _settingsModel.IconsRelativePath;
+            _textFieldGUIContent = new GUIContent("Icons relative path",
+                "The icons directory's relative path inside Assets folder. " +
+                "/n Example: \"FirstPartyAssets/GameIcons\" = \"Assets/FirstPartyAssets/GameIcons\"");
         }
             
         public void DrawPanel()
         {
-            _unnapliedFolderRelativePath = EditorGUILayout.TextField("Icons path", _unnapliedFolderRelativePath);
-            
+            UGUIUtils.VerticalLayout(false,
+                DrawPathEditTextField,
+                DrawApplySettingsButton,
+                DrawResetSettingsButton);
+        }
+
+        private void DrawPathEditTextField()
+        {
+            GUILayout.Space(10);
+            _unnapliedFolderRelativePath =
+                EditorGUILayout.TextField(_textFieldGUIContent, _unnapliedFolderRelativePath);
+        }
+
+        private void DrawApplySettingsButton()
+        {
+            GUILayout.Space(15);
             var hasChanges = !string.IsNullOrWhiteSpace(_unnapliedFolderRelativePath)
-                         && _unnapliedFolderRelativePath != _settingsModel.IconsRelativePath;
+                             && _unnapliedFolderRelativePath != _settingsModel.IconsRelativePath;
 
             UGUIUtils.DrawButton("Apply Changes", ApplySettings, hasChanges);
+        }
+        
+        private void DrawResetSettingsButton()
+        {
+            GUILayout.Space(10);
             UGUIUtils.DrawButton("Reset to defaults", ResetToDefaults, _settingsModel.UsingCustomSettings);
         }
 

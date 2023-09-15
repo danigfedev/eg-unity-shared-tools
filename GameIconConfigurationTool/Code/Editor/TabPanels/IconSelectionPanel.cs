@@ -44,17 +44,23 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
             
             if (!CheckExistingIcons())
             {
-                UGUIUtils.DrawButton(ImportFirstIconButtonLabel, ImportIcon);
+                DrawImportFirstIconSection();
             }
             else
             {
-                SetIconNames(); //TODO maybe move this into CheckExistingIcons. This will be involved in teh DirtyFlag, for sure
+                SetIconNames(); //TODO: maybe move this into CheckExistingIcons. This will be involved in teh DirtyFlag, for sure
 
                 DrawIconPreviewSection();
                 DrawIconSelectionSection();
                 DrawPlatformSelectionCheckboxes();
                 DrawSetIconsButtonSection();
             }
+        }
+
+        private void DrawImportFirstIconSection()
+        {
+            GUILayout.Space(10);
+            UGUIUtils.DrawButton(ImportFirstIconButtonLabel, ImportIcon);
         }
 
         private void DrawIconPreviewSection()
@@ -68,6 +74,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
                 return;
             }
 
+            GUILayout.Space(10);
             UGUIUtils.HorizontalLayout(true, DrawPreview);
 
             void DrawPreview()
@@ -214,7 +221,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 
         private bool CheckSelectedDirectoryValidity(DirectoryInfo iconDirectoryInfo)
         {
-            //Directory will have three images (presumably png files):
+            //Directory will have three images:
             // - icon.png (1024 x 1024)
             // - background.png (1024 x 1024)
             // - foreground.png (1024 x 1024)
