@@ -20,7 +20,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
         private const string ForegroundFileKey = "foreground.png";
         private const bool DefaultTargetToggleStatus = true;
         
-        private IconToolSettingsModel _settingsModel;
+        private readonly IconToolSettingsModel _settingsModel;
         private int _selectedOptionIndex;
         private string[] _iconSubdirectoryPaths;
         private string[] _iconSubdirectoryNames;

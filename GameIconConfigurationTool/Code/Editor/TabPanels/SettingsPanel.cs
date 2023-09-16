@@ -8,17 +8,24 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 {
     public class SettingsPanel : IIconsToolTabPanel
     {
-        private IconToolSettingsModel _settingsModel;
+        private const string TextFieldTooltipId = "SettingsIconPathTextField";
+        private const string TextFieldLabel = "Icons relative pat";
+        private const string TextFieldTooltip = "The icons directory's relative path inside Assets folder. " +
+                                                "Example: \"FirstPartyAssets/GameIcons\" = \"Assets/FirstPartyAssets/GameIcons\"";
+            
+        private readonly IconToolSettingsModel _settingsModel;
+        private readonly TooltipCache _tooltipCache;
         private string _unnapliedFolderRelativePath = "";
-        private GUIContent _textFieldGUIContent;
 
-        public SettingsPanel(IconToolSettingsModel settingsModel)
+        public SettingsPanel(IconToolSettingsModel settingsModel, TooltipCache tooltipCache)
         {
             _settingsModel = settingsModel;
+            _tooltipCache = tooltipCache;
             _unnapliedFolderRelativePath = _settingsModel.IconsRelativePath;
-            _textFieldGUIContent = new GUIContent("Icons relative path",
-                "The icons directory's relative path inside Assets folder. " +
-                "/n Example: \"FirstPartyAssets/GameIcons\" = \"Assets/FirstPartyAssets/GameIcons\"");
+
+            var textFieldGUIContent = new GUIContent(TextFieldLabel,
+                TextFieldTooltip);
+            _tooltipCache.RegisterTooltip(TextFieldTooltipId, textFieldGUIContent);
         }
             
         public void DrawPanel()
@@ -31,9 +38,10 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor.TabPanels
 
         private void DrawPathEditTextField()
         {
+            var tooltip = _tooltipCache.GetTooltip(TextFieldTooltipId);
+            
             GUIUtils.DrawSpace(10);
-            _unnapliedFolderRelativePath =
-                EditorGUILayout.TextField(_textFieldGUIContent, _unnapliedFolderRelativePath);
+            _unnapliedFolderRelativePath = GUIUtils.DrawTextField(tooltip, _unnapliedFolderRelativePath);
         }
 
         private void DrawApplySettingsButton()

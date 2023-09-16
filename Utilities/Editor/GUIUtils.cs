@@ -54,6 +54,30 @@ namespace eg_unity_shared_tools.Utilities.Editor
             if (centerElements) GUILayout.FlexibleSpace();
         }
 
+        public static Vector2 DrawScrollView(Vector2 scrollPosition, params Action[] drawingMethods)
+        {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+            foreach (var drawMethod in drawingMethods)
+            {
+                drawMethod?.Invoke();
+            }
+            EditorGUILayout.EndScrollView();
+
+            return scrollPosition;
+        }
+        
+        public static Vector2 DrawScrollView(Vector2 scrollPosition, float height, params Action[] drawingMethods)
+        {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(height));
+            foreach (var drawMethod in drawingMethods)
+            {
+                drawMethod?.Invoke();
+            }
+            EditorGUILayout.EndScrollView();
+            
+            return scrollPosition;
+        }
+
         public static void DrawSpace(float pixels) => GUILayout.Space(pixels);
 
         public static void DrawButton(string label, Action callback,
@@ -73,7 +97,22 @@ namespace eg_unity_shared_tools.Utilities.Editor
 
             EditorGUI.EndDisabledGroup();
         }
+        
+        public static string DrawTextField(string value)
+        {
+            return EditorGUILayout.TextField(value);
+        }
+        
+        public static string DrawTextField(string label, string value)
+        {
+            return EditorGUILayout.TextField(label, value);
+        }
 
+        public static string DrawTextField(GUIContent content, string value)
+        {
+            return EditorGUILayout.TextField(content, value);
+        }
+        
         public static int DrawTabs(int selectedTabIndex, string[] tabNames, int[] disabledTabsIndexes = null)
         {
             GUILayout.BeginHorizontal();
@@ -145,5 +184,7 @@ namespace eg_unity_shared_tools.Utilities.Editor
         }
 
         public static void DrawLabel(string label, GUIStyle style) => GUILayout.Label(label, style);
+
+        public static void DrawLabel(string label, params GUILayoutOption[] options) => GUILayout.Label(label, options);
     }
 }

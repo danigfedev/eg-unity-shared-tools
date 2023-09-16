@@ -11,7 +11,8 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
     {
         private static GameIconConfigurationTool _window;
 
-        private static IconToolSettingsModel _settingsModel;
+        private TooltipCache _tooltipCache;
+        private IconToolSettingsModel _settingsModel;
         private IIconsToolTabPanel _settingsPanel;
         private IIconsToolTabPanel _iconSelectionPanel;
 
@@ -23,15 +24,7 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
         private void OnEnable()
         {
-            _settingsModel = new IconToolSettingsModel();
-            _settingsModel.OnSettingsApplied += OnToolSettingsApplied;
-            
             InitializeWindow();
-        }
-
-        private void OnDisable()
-        {
-            _settingsModel.OnSettingsApplied -= OnToolSettingsApplied;
         }
 
         protected override void OnGUI()
@@ -51,6 +44,9 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
 
         private void InitializeWindow()
         {
+            _tooltipCache = new TooltipCache();
+            _settingsModel = new IconToolSettingsModel();
+            
             try
             {
                 _settingsModel.LoadSettings();
@@ -74,27 +70,8 @@ namespace eg_unity_shared_tools.GameIconConfigurationTool.Code.Editor
         private void InitializeTabPanels()
         {
             _selectedTabIndex = (int)GameIconToolTabs.ICON_SELECTION;
-            _settingsPanel = new SettingsPanel(_settingsModel);
+            _settingsPanel = new SettingsPanel(_settingsModel, _tooltipCache);
             _iconSelectionPanel = new IconSelectionPanel(_settingsModel);
-        }
-        
-        //IDEA: ITabContent interface defining DrawTabContent
-        // Then implement class IconToolSettingsTab : ITabContent
-        // Study if it's better that or using an abstract class
-        //Then create the three objects on initialization, or ask a factory to create them
-        //Here, instead of implementing this draw methods, just call the DrawTabContent method from the interface
-        
-        //DOUBT: How to handle Initialization? That can be abstracted, since it's specific of each tab
-        // I can skip the Factory and creat the tabs here, by type. Then I can initialize them.
-        
-        private void DrawImportIconTab()
-        {
-            GUILayout.Label("Import Icon Tab");
-        }
-        
-        private void OnToolSettingsApplied()
-        {
-            
         }
     }
 }

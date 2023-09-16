@@ -14,7 +14,7 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
         private string _assetBundleFilePath = "";
         private string _assetBundleContentList = "";
         private int _numLines;
-        private Vector2 scrollPosition;
+        private Vector2 _scrollPosition;
         private int _scrollHeight = 250;
         private GUIStyle boxStyle;
 
@@ -47,7 +47,7 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
 
             void DrawTextField()
             {
-                _assetBundleFilePath = EditorGUILayout.TextField(_assetBundleFilePath);
+                _assetBundleFilePath = GUIUtils.DrawTextField(_assetBundleFilePath);
             }
 
             void DrawFilePickerButton()
@@ -72,9 +72,8 @@ namespace eg_unity_shared_tools.AssetBundleExplorerTool.Editor
 
             void DrawScrollView()
             {
-                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(200));
-                GUILayout.Label(_assetBundleContentList, GUILayout.ExpandHeight(true));
-                EditorGUILayout.EndScrollView();
+                _scrollPosition = GUIUtils.DrawScrollView(_scrollPosition, 200,
+                    () => GUIUtils.DrawLabel(_assetBundleContentList, GUILayout.ExpandHeight(true)));
             }
         }
         
